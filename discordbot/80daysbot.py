@@ -69,7 +69,8 @@ async def ping(ctx):
 @client.command(pass_context=True)
 async def pay(ctx, target_location, amount):
     # Get the data we need
-
+    
+    # Make sure it's a valid location.
     # Store the payment in the db
 
     # Send confirmation message.
@@ -78,6 +79,29 @@ async def pay(ctx, target_location, amount):
 @client.command(pass_context=True)
 async def sabotage(ctx, target_team, target_location, amount):
     # just pay() but with negative coins and another team
+    pass
+
+# Print's players current coin count
+@client.command()
+async def me(ctx):
+    member = ctx.message.author
+    try:
+        p = models.Player()
+        p.custom_load("discord_id = ?", (member.id,))
+        await ctx.send(">>> {}, you have {} coins".format(member.mention, p.coins))
+    except Exception:
+        # Show error if user isn't actually playing
+        await ctx.send("I... don't believe you're playing.\n\
+            (If you think this is a mistake, please talk to a Lord or the King)")
+
+# Prints the player's team's current funding for the day,
+# As well as current location,
+# And total distance remaining.
+@client.command()
+async def team(ctx):
+    # funding_table = ""
+    # ctx.send("Your team is in {}, with {}km remaining\n\
+    #     Here is how your funding is going:\n{}".format())
     pass
 
 client.run(os.environ['80DAYS_TOKEN'])
