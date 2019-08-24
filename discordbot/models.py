@@ -1,5 +1,6 @@
 import sqlite3 as sql
 
+# TODO LITERALLY ANY ERROR HANDLING SMH
 conn = sql.connect('internal.sqlite3')
 c = conn.cursor()
 
@@ -149,6 +150,9 @@ class Player:
     discord_id: str
     team_id: int
     coins: int
+
+    def __init__(self):
+        self.player_id = -1
 
     def load(self, id):
         c.execute("SELECT * FROM Player WHERE player_id = ?", str(id))
