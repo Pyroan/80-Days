@@ -1,5 +1,6 @@
 # This isn't going to be used in code this is just so I can plan something
-*london -> dublin, madrid, lisbon
+# JK I ain't manually adding all these edges.
+london -> dublin, madrid, lisbon
 dublin -> madrid, lisbon, reykjavik
 madrid -> lisbon, casablanca
 lisbon -> new york city, miami, port-au-prince
@@ -25,7 +26,7 @@ guatemala -> mexico city
 mexico city -> dallas, el paso
 santiago -> auckland
 chicago -> minneapolis, kansas city
-new orleans - dallas, kansas city
+new orleans -> dallas, kansas city
 minneapolis -> denver, winnipeg
 kansas city -> dallas, denver
 winnipeg -> edmonton, seattle
@@ -55,13 +56,13 @@ bangkok -> dhaka, hanoi
 tokyo -> seoul, shanghai, taipei
 seoul -> beijing, shanghai
 beijing -> chongqing, hong kong
-shangai -> chongqing
+shanghai -> chongqing
 chongqing -> hanoi, dhaka
 taipei -> hong kong, shanghai
 hong kong -> hanoi, chongqing
 hanoi -> dhaka
 dhaka -> kathmandu, mumbai
-kathmandu -> new dehli, mumbai
+kathmandu -> mumbai
 mumbai -> dubai
 dubai -> cairo, baghdad
 baghdad -> ankara, beirut
@@ -71,6 +72,7 @@ izmir -> athens, catania, tunis
 cairo -> athens, catania
 athens -> sofia, sarajevo, rome
 catania -> naples, rome, monaco
+monaco -> zurich, paris
 naples -> rome, monaco
 tunis -> valencia, rome
 sarajevo -> vienna, budapest
@@ -78,14 +80,17 @@ rome -> monaco, barcelona
 beirut -> izmir, athens
 sofia -> sarajevo, budapest
 bucharest -> sarajevo, budapest
+budapest -> vienna, prague
 valencia -> monaco, barcelona
 barcelona -> monaco
 vienna -> prague, munich, katowice
 prague -> berlin, frankfurt
 munich -> frankfurt, zurich
+frankfurt -> brussels, amsterdam
 katowice -> prague, berlin
 berlin -> copenhagen, cologne
 zurich -> brussels, paris
+cologne -> brussels, amsterdam
 paris -> brussels, amsterdam
 brussels -> amsterdam
 amsterdam -> manchester
