@@ -1,0 +1,95 @@
+# This isn't going to be used in code this is just so I can plan something
+*london -> dublin, madrid, lisbon
+dublin -> madrid, lisbon, reykjavik
+madrid -> lisbon, casablanca
+lisbon -> new york city, miami, port-au-prince
+casablanca -> miami, port-au-prince, caracas
+reykjavik -> new york city, quebec city
+quebec city -> ottawa, montreal
+new york city -> pittsburgh, charlotte
+ottawa -> chicago, detroit, winnipeg, pittsburgh
+montreal -> ottawa, detroit, pittsburgh
+charlotte -> pittsburgh, atlanta, nashville
+port-au-prince -> panama city, havana
+caracas -> panama city, lima
+havana -> new orleans, guatemala
+miami -> charlotte, atlanta
+lima -> galapagos islands, santiago
+pittsburgh -> detroit, chicago, nashville
+atlanta -> nashville, dallas
+detroit -> chicago, kansas city
+nashville -> dallas, chicago, kansas city
+panama city -> guatemala, mexico city
+galapagos islands -> honolulu
+guatemala -> mexico city
+mexico city -> dallas, el paso
+santiago -> auckland
+chicago -> minneapolis, kansas city
+new orleans - dallas, kansas city
+minneapolis -> denver, winnipeg
+kansas city -> dallas, denver
+winnipeg -> edmonton, seattle
+edmonton -> juneau
+denver -> las vegas, phoenix, seattle
+dallas -> el paso, denver
+el paso -> phoenix, las vegas
+phoenix -> los angeles, san diego
+juneau -> anchorage
+las vegas -> san francisco, san diego, los angeles
+san diego -> honolulu
+san francisco -> tokyo, seattle
+seattle -> vancouver, tokyo
+vancouver -> tokyo, juneau
+los angeles -> tokyo, honolulu
+anchorage -> tokyo
+honolulu -> auckland, sydney, tokyo
+auckland -> sydney
+sydney -> melbourne, perth, adelaide
+melbourne -> adelaide, perth
+adelaide -> perth
+perth -> jakarta
+jakarta -> singapore
+singapore -> bangkok, colombo
+colombo -> mumbai
+bangkok -> dhaka, hanoi
+tokyo -> seoul, shanghai, taipei
+seoul -> beijing, shanghai
+beijing -> chongqing, hong kong
+shangai -> chongqing
+chongqing -> hanoi, dhaka
+taipei -> hong kong, shanghai
+hong kong -> hanoi, chongqing
+hanoi -> dhaka
+dhaka -> kathmandu, mumbai
+kathmandu -> new dehli, mumbai
+mumbai -> dubai
+dubai -> cairo, baghdad
+baghdad -> ankara, beirut
+ankara -> istanbul, izmir
+istanbul -> sofia, bucharest
+izmir -> athens, catania, tunis
+cairo -> athens, catania
+athens -> sofia, sarajevo, rome
+catania -> naples, rome, monaco
+naples -> rome, monaco
+tunis -> valencia, rome
+sarajevo -> vienna, budapest
+rome -> monaco, barcelona
+beirut -> izmir, athens
+sofia -> sarajevo, budapest
+bucharest -> sarajevo, budapest
+valencia -> monaco, barcelona
+barcelona -> monaco
+vienna -> prague, munich, katowice
+prague -> berlin, frankfurt
+munich -> frankfurt, zurich
+katowice -> prague, berlin
+berlin -> copenhagen, cologne
+zurich -> brussels, paris
+paris -> brussels, amsterdam
+brussels -> amsterdam
+amsterdam -> manchester
+copenhagen -> edinburgh, oslo
+oslo -> edinburgh
+edinburgh -> manchester, london
+manchester -> london
