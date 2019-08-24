@@ -1,12 +1,13 @@
 import models
 
-# Minimum distance between two nodes
+# Minimum distance between two edge ID's
 def get_min_distance(start, end):
     pass
 
-# Return a list of location names connected to the
-# team's scurrent location
+# Return a ditionary of location names and distances for locations
+#  connected to the team's scurrent location
 def get_next_location_list(team_id):
+    locations = {}
 
     team = models.Team()
     team.load(team_id)
@@ -18,4 +19,9 @@ def get_next_location_list(team_id):
     ls.custom_load("location_id IN ({})".format(','.join(["?"] * len(edges.items))),
         [x.end_location_id for x in edges.items])
 
-    return [x.name for x in ls.items]
+    # MUCH BIGGER HACK that could have been solved with a join instead but why bother
+    for l in ls.items:
+        locations[l.name] = list(filter(
+            lambda x: x.end_location_id == l.location_id, edges.items))[0].weight
+
+    return locations
