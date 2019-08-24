@@ -35,6 +35,3 @@ def create_all_edges(save=False):
     
     if save:
         models.save()
-
-
-create_all_edges(save = True)
