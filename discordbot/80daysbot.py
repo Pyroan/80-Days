@@ -50,8 +50,17 @@ async def on_member_join(member):
     p.insert()
     models.save()
 
-    # TODO Post message to player-assignments channel
-    # await ctx.send("Some stuff")
+    # Post message to player-assignments channel
+    pa_chan = get(member.guild.text_channels, name="player-assignments")
+    ins_chan = get(member.guild.text_channels, name="instructions")
+    await pa_chan.send(
+        "Welcome, {}! You have been assigned to the **{}**!\n\
+        Make sure to check out the {} and good luck!".format(
+            member.mention,
+            t.name, 
+            ins_chan.mention
+        )
+        )
 
 @client.command()
 async def ping(ctx):
