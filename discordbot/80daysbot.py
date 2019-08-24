@@ -8,8 +8,8 @@ import os
 from random import randint
 import json
 
-
 import models
+import graphanalyzer
 
 
 logging.basicConfig(level=logging.INFO)
@@ -68,13 +68,14 @@ async def ping(ctx):
 
 @client.command(pass_context=True)
 async def pay(ctx, target_location, amount):
-    # Get the data we need
+    # Get team, current location, available locations
     
     # Make sure it's a valid location.
     # Store the payment in the db
+    pmnt = models.Payment()
 
+    models.save()
     # Send confirmation message.
-    pass
 
 @client.command(pass_context=True)
 async def sabotage(ctx, target_team, target_location, amount):
