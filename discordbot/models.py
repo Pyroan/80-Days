@@ -7,7 +7,6 @@ c = conn.cursor()
 def save():
     conn.commit()
 
-# TODO Add a list version of this?
 class Location:
     location_id: int
     name: str
@@ -35,7 +34,19 @@ class Location:
     def delete(self):
         c.execute("DELETE FROM Location WHERE location_id = ?", str(self.location_id))
 
-# TODO Add a list version of this so we can load each team's options
+class Location_list:
+    items = []
+
+    def custom_load(self, where: str, values: tuple):
+        self.items = []
+        c.execute("SELECT * FROM Location WHERE " + where, values)
+        rows = c.fetchall()
+        for item in rows:
+            l = Location()
+            l.location_id = item[0]
+            l.name = item[1]
+            self.items.append(l)
+
 class LocationEdge:
     edge_id: int
     start_location_id : int
@@ -68,6 +79,22 @@ class LocationEdge:
     
     def delete(self):
         c.execute("DELETE FROM LocationEdge WHERE edge_id = ?", str(self.edge_id))
+
+
+class LocationEdge_list:
+    items = []
+
+    def custom_load(self, where: str, values: tuple):
+        self.items = []
+        c.execute("SELECT * FROM LocationEdge WHERE " + where, values)
+        rows = c.fetchall()
+        for item in rows:
+            l = LocationEdge()
+            l.edge_id = item[0]
+            l.start_location_id = item[1]
+            l.end_location_id = item[2]
+            l.weight = item[3]
+            self.items.append(l)
 
 
 class Log:
