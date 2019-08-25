@@ -9,6 +9,8 @@ from random import randint
 import json
 from datetime import date
 import time
+import schedule
+import threading
 
 import models
 import graphanalyzer
@@ -27,11 +29,28 @@ async def on_ready():
     logging.info('Use this link to invite {}:'.format(client.user.name))
     logging.info('https://discordapp.com/oauth2/authorize?client_id={}&scope=bot&permissions=8'.format(client.user.id))
 
-# @client.event
-# async def on_log():
-#     # Post an update to the game announcements channel
-#     pass
-    
+@client.event
+async def check_for_new_logs():
+    while True:
+        logging.info("Checking for new logs...")
+        logs = models.Log_list()
+        logs.custom_load("sent = ?", (0,))
+        if len(logs.items) > 0:
+            # Try to send them and die inside.
+            try:
+                ch = client.get_channel(614344478601510912)
+                for log in logs.items:
+                    await ch.send(log.msg)
+                    log.sent = 1
+                    log.update()
+                models.save()
+            except AttributeError:
+                logging.info("We can't see the channel yet. We'll get 'em next time.")
+        await asyncio.sleep(5)
+
+# TODO This
+async def end_game():
+    pass
 
 @client.event
 async def on_member_join(member):
@@ -213,4 +232,5 @@ async def team(ctx):
     #     Here is how your funding is going:\n{}".format())
     pass
 
+client.loop.create_task(check_for_new_logs())
 client.run(os.environ['80DAYS_TOKEN'])

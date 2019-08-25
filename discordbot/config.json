@@ -1,4 +1,6 @@
 {
     "starting_coins": 100,
-    "daily_team_coins": 1000
+    "daily_team_coins": 1000,
+    "game_length": 80,
+    "refund_percentage": 75
 }
