@@ -7,6 +7,8 @@ import logging
 import os
 from random import randint
 import json
+from datetime import date
+import time
 
 import models
 import graphanalyzer
@@ -14,6 +16,8 @@ import graphanalyzer
 
 logging.basicConfig(level=logging.INFO)
 client = Bot(description="80 Days Bot", command_prefix=("!"), pm_help=True)
+
+locale.setlocale()
 
 with open('config.json') as f:
     config = json.loads(f.read())
@@ -66,18 +70,58 @@ async def on_member_join(member):
 async def ping(ctx):
     await ctx.send("I am here.")
 
-@client.command(pass_context=True)
+@client.command()
 async def pay(ctx, target_location, amount):
-    # Get team, current location, available locations
-    
-    # Make sure it's a valid location.
-    # Store the payment in the db
-    pmnt = models.Payment()
+    amount = int(amount) # dumb.
+    member = ctx.message.author
+    p = models.Player()
+    try:
+        p.custom_load("discord_id = ?", (member.id,))
+    except Exception:
+        await ctx.send("I don't have you listed as a player, {}\n\
+            If you believe this is an error, please talk to a Lord or the King".format(
+                member.mention))
+        return
+    # TODO Make sure player has enough coins!!!
+    if amount > p.coins:
+        await ctx.send("{}, you don't have enough coins!".format(member.mention))
+        return
+    # Get team, current location id, available locations
+    t = models.Team()
+    t.load(p.team_id)
+    current_loc = t.current_location_id
+    avail_locs = graphanalyzer.get_next_location_list(t.team_id)
+    # Make sure it's a valid target location.
+    if target_location.lower() not in (name.lower() for name in avail_locs.keys()):
+        await ctx.send("I don't think {} is a valid location. Maybe you mistyped it?".format(
+            target_location
+        ))
+        return
+    # Get the ID for the target location...
+    target_loc = models.Location()
+    target_loc.custom_load("name = ? COLLATE NOCASE", (target_location,))
 
+    edge = models.LocationEdge()
+    edge.custom_load("start_location_id = ? AND end_location_id = ?",
+        (current_loc, target_loc.location_id,))
+    # Store the payment in the db
+    payment = models.Payment()
+    payment.player_id = p.player_id
+    payment.team_id = p.team_id
+    payment.amount = amount
+    payment.location_edge = edge.edge_id
+    payment.time = str(date.today())
+    payment.insert()
+
+    # Remove coins from player's account.
+    p.coins -= amount
+    p.update()
     models.save()
     # Send confirmation message.
+    await ctx.send("{} has paid **{}** coins toward **{}**".format(
+        member.mention, amount, target_loc.name))
 
-@client.command(pass_context=True)
+@client.command()
 async def sabotage(ctx, target_team, target_location, amount):
     # just pay() but with negative coins and another team
     pass
@@ -92,15 +136,15 @@ async def me(ctx):
         await ctx.send(">>> {}, you have {} coins".format(member.mention, p.coins))
     except Exception:
         # Show error if user isn't actually playing
-        await ctx.send("I... don't believe you're playing.\n\
-            (If you think this is a mistake, please talk to a Lord or the King)")
+        await ctx.send("I... don't believe you're playing, {}\n\
+            (If you think this is a mistake, please talk to a Lord or the King)".format(member.mention))
 
 # Prints the player's team's current funding for the day,
 # As well as current location,
 # And total distance remaining.
 @client.command()
 async def team(ctx):
-    # funding_table = ""
+    # funding_table = paymentreducer.get_funding_table()
     # ctx.send("Your team is in {}, with {}km remaining\n\
     #     Here is how your funding is going:\n{}".format())
     pass
