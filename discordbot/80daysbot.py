@@ -55,10 +55,10 @@ async def end_game():
 
 @client.event
 async def on_member_join(member):
-    #TODO Handle if a player leaves and rejoins
-
+    pa_chan = get(member.guild.text_channels, name="player-assignments")
+    ins_chan = get(member.guild.text_channels, name="instructions")
     # Assign the new member to one of the three teams randomly
-    #TODO Get number of teams through the DB and not hardcode a 3
+    # FIXME Get number of teams through the DB and not hardcode a 3
     team_id = randint(1,3)
     t = models.Team()
     t.load(team_id)
@@ -67,6 +67,14 @@ async def on_member_join(member):
     await member.add_roles(role)
     # Create new Player record.
     p = models.Player()
+    # First check if they already exist
+    try:
+        p.custom_load("discord_id = ?", (member.id,))
+        t.load(p.team_id)
+        await pa_chan.send("Welcome back, {}! the **{}** missed you!".format(member.mention, t.name))
+        return
+    except Exception:
+        pass
     p.discord_id = member.id
     p.team_id = team_id
     p.coins = config['starting_coins']
@@ -74,8 +82,6 @@ async def on_member_join(member):
     models.save()
 
     # Post message to player-assignments channel
-    pa_chan = get(member.guild.text_channels, name="player-assignments")
-    ins_chan = get(member.guild.text_channels, name="instructions")
     await pa_chan.send(
         "Welcome, {}! You have been assigned to the **{}**!\n\
         Make sure to check out the {} and good luck!".format(
