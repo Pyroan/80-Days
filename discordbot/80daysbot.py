@@ -13,6 +13,7 @@ import threading
 
 import models
 import graphanalyzer
+import scheduledjobs
 
 
 logging.basicConfig(level=logging.INFO)

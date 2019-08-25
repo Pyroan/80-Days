@@ -105,6 +105,9 @@ class Log:
     sent: int
     target_channel_id: int
 
+    def __init__(self):
+        self.sent = 0
+
     def load(self, id):
         c.execute("SELECT * FROM Log WHERE log_id = ?", str(id))
         row = c.fetchone()
@@ -126,7 +129,7 @@ class Log:
         self.target_channel_id = row[5]
     
     def insert(self):
-        c.execute("INSERT INTO Log(date, game_day, msg, sent) VALUES (?,?,?,?,?)",
+        c.execute("INSERT INTO Log(date, game_day, msg, sent, target_channel_id) VALUES (?,?,?,?,?)",
             (self.date, self.game_day, self.msg, self.sent, self.target_channel_id))
     
     def update(self):
