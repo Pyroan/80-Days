@@ -1,5 +1,19 @@
 # Helper functions, mostly for creating the game
 import models
+import json
+from datetime import datetime, timedelta
+
+with open('config.json') as f:
+    config = json.loads(f.read())
+
+def get_game_day():
+    start_time = datetime.strptime(config['start_date'],"%Y-%m-%d %H:%M")
+    # Get time truncked to current hour
+    now = datetime.now()
+    now.replace(minute=0,second=0,microsecond=0)
+    td = now - start_time
+    return td.seconds // 3600
+
 
 def create_edge(start_loc, end_loc, weight=0):
     print("Trying to create {} -> {}".format(start_loc, end_loc))

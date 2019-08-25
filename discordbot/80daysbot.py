@@ -14,6 +14,7 @@ import threading
 import models
 import graphanalyzer
 import scheduledjobs
+import helpers
 
 
 logging.basicConfig(level=logging.INFO)
@@ -129,7 +130,7 @@ async def pay(ctx, target_location, amount):
     payment.team_id = p.team_id
     payment.amount = amount
     payment.location_edge = edge.edge_id
-    payment.time = str(date.today())
+    payment.time = helpers.get_game_day()
     payment.insert()
 
     # Remove coins from player's account.
@@ -196,7 +197,7 @@ async def sabotage(ctx, target_team, target_location, amount):
     payment.team_id = t.team_id
     payment.amount = -amount # VERY IMPORTANT DIFFERENCE
     payment.location_edge = edge.edge_id
-    payment.time = str(date.today())
+    payment.time = helpers.get_game_day()
     payment.insert()
 
     # Remove coins from the player's account
@@ -231,6 +232,13 @@ async def team(ctx):
     # ctx.send("Your team is in {}, with {}km remaining\n\
     #     Here is how your funding is going:\n{}".format())
     pass
+
+@client.command(brief="Start the game!", hidden=True)
+@commands.has_role("King")
+async def startgame(ctx):
+    config['game_ongoing'] = 1
+    with open('config.json') as f:
+        json.dump(config, f)
 
 client.loop.create_task(check_for_new_logs())
 client.run(os.environ['80DAYS_TOKEN'])

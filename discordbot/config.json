@@ -1,6 +1,10 @@
 {
-    "starting_coins": 100,
-    "daily_team_coins": 1000,
+    "starting_coins": 200,
+    "daily_team_coins": 1500,
     "game_length": 80,
-    "refund_percentage": 75
+    "refund_percentage": 75,
+
+    "start_date": "2019-08-25 08:00",
+    "game_ongoing": 0
+
 }
