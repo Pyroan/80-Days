@@ -7,7 +7,7 @@ import logging
 import os
 from random import randint
 import json
-from datetime import date
+from datetime import datetime
 import time
 import threading
 
@@ -243,9 +243,43 @@ async def team(ctx):
 @client.command(brief="Start the game!", hidden=True)
 @commands.has_role("King")
 async def startgame(ctx):
+    logging.info("The king has signalled to begin the game!")
+    # Reset every player's coins
+    logging.info("Resetting player coins...")
+    ps = models.Player_list()
+    ps.custom_load("player_id > ?", (0,)) # HACK to select all
+    for p in ps.items:
+        p.coins = config["starting_coins"]
+        p.update()
+    # Reset every team's starting location
+    logging.info("Resetting team locations...")
+    ts = models.Team_list()
+    ts.custom_load("team_id > ?", (0,)) # SAME HACK to select all
+    for t in ts.items:
+        t.current_location_id = 1
+        t.update()
+
+    # Set time to -1 for all payments (i'm sorry reality)
+    logging.info("Invalidating previous payments...")
+    pmts = models.Payment_list()
+    pmts.custom_load("time >= ?", (0,))
+    for p in pmts.items:
+        p.time = -1
+        p.update()
+
+    models.save()
+    # Update config
     config['game_ongoing'] = 1
-    with open('config.json') as f:
+    d = datetime.now()
+    d = d.replace(minute=0, second=0,microsecond=0)
+    config['start_date'] = str(d)
+    with open('config.json', 'w') as f:
         json.dump(config, f)
+    scheduledjobs.config = config
+    helpers.config = config
+    # TODO Send start of game message...
+    scheduledjobs.on_new_day() # if this works...
+
 
 client.loop.create_task(check_for_new_logs())
 client.run(os.environ['80DAYS_TOKEN'])

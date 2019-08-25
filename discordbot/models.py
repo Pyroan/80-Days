@@ -265,7 +265,18 @@ class Player:
 
 
 class Player_list:
-    pass
+    items = []
+    def custom_load(self, where: str, values: tuple):
+        self.items = []
+        c.execute("SELECT * FROM Player WHERE " + where, values)
+        rows = c.fetchall()
+        for item in rows:
+            p = Player()
+            p.player_id = item[0]
+            p.discord_id = item[1]
+            p.team_id = item[2]
+            p.coins = item[3]
+            self.items.append(p)
 
 class Team:
     team_id: int
@@ -296,3 +307,16 @@ class Team:
 
     def delete(self):
         c.execute("DELETE FROM Team WHERE team_id = ?", str(self.team_id))
+
+class Team_list:
+    items = []
+    def custom_load(self, where: str, values: tuple):
+        self.items = []
+        c.execute("SELECT * FROM Team WHERE " + where, values)
+        rows = c.fetchall()
+        for item in rows:
+            t = Team()
+            t.team_id = item[0]
+            t.name = item[1]
+            t.current_location_id = item[2]
+            self.items.append(t)

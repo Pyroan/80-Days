@@ -15,9 +15,13 @@ import helpers
 with open('config.json') as f:
     config = json.loads(f.read())
 
+# Actually try to move the team in the db and
+# Return a string describing the team's move
+# TODO
 def team_attempt_move(team_id):
-    pass
+    return " "
 
+# TODO This
 def pay_players():
     # load all the players
     # players = models.Player_list()
@@ -40,8 +44,10 @@ def next_location_table(team_id):
 def on_new_day():
     print("A new day dawns...")
     # Each team tries to move to a new location!
+    progress_log = []
     for i in range(3):
-        team_attempt_move(i)
+        progress_log.append(team_attempt_move(i))
+    progress_log.append("\n")
     # Send coins to players
     pay_players()
 
@@ -50,9 +56,11 @@ def on_new_day():
         msg = []
         msg.append("A new day has begun! Welcome to day **{}**!\n".format(helpers.get_game_day()))
         msg.append("Here's what's happened since yesterday:\n")
-        # TODO what happened yesterday
         msg.append("```\n")
-        msg.append("Nothing!\n")
+        if helpers.get_game_day() == 1:
+            msg.append("The race began!\n")
+        else:
+            msg.append("\n".join(progress_log))
         msg.append("```\n")
 
         # TODO next locations
@@ -91,7 +99,7 @@ def run_jobs():
         time.sleep(1)
         sys.stdout.flush()
 
-schedule.every().hour.do(on_new_day)
+schedule.every().hour.at(':00').do(on_new_day)
 schedule.every().hour.at(':50').do(ten_minute_warning)
 
 # FOR TESTING
