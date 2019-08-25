@@ -7,12 +7,12 @@ with open('config.json') as f:
     config = json.loads(f.read())
 
 def get_game_day():
-    start_time = datetime.strptime(config['start_date'],"%Y-%m-%d %H:%M")
+    start_time = datetime.strptime(config['start_date'],"%Y-%m-%d %H:%M:%S")
     # Get time truncked to current hour
     now = datetime.now()
     now.replace(minute=0,second=0,microsecond=0)
     td = now - start_time
-    return td.seconds // 3600
+    return (td.seconds // 3600) + 1
 
 
 def create_edge(start_loc, end_loc, weight=0):
