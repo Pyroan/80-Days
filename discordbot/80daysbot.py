@@ -110,7 +110,10 @@ async def pay(ctx, target_location, amount):
                 member.mention))
         return
     # Make sure player has enough coins!!!
-    if amount > p.coins:
+    if amount < 1:
+        await ctx.send("You can't pay 0 or negative coins, {}".format(member.mention))
+        return
+    elif amount > p.coins:
         await ctx.send("{}, you don't have enough coins!".format(member.mention))
         return
     # Get team, current location id, available locations
@@ -163,7 +166,10 @@ async def sabotage(ctx, target_team, target_location, amount):
             If you believe this is a mistake, please talk to a Lord or the King".format(member.mention))
         return
     # Mke sure player has enough coins
-    if amount > p.coins:
+    if amount < 1:
+        await ctx.send("You can't pay 0 or negative coins, {}".format(member.mention))
+        return
+    elif amount > p.coins:
         await ctx.send("{}, you don't have enough coins!".format(member.mention))
         return
     
