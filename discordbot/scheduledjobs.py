@@ -20,10 +20,11 @@ def team_attempt_move(team_id):
 
 def pay_players():
     # load all the players
-    players = model.Player_list()
-    # pay 'em
-    for player in players:
-        pass
+    # players = models.Player_list()
+    # # pay 'em
+    # for player in players:
+    #     pass
+    pass
 
 
 def next_location_table(team_id):
@@ -75,6 +76,14 @@ def on_new_day():
 
         conn.commit()
 
+def ten_minute_warning():
+    l = models.Log()
+    l.date = str(datetime.now())
+    l.game_day = helpers.get_game_day()
+    l.msg = "10 minutes remaining in the day! Get those payments in!!!"
+    l.target_channel_id = config['channels']['test']
+    l.insert()
+    models.save()
 
 def run_jobs():
     while True:
@@ -82,9 +91,11 @@ def run_jobs():
         time.sleep(1)
         sys.stdout.flush()
 
-# schedule.every().hour.do(on_new_day)
-#schedule.every().minute.do(on_new_day)
-#schedule.every(30).seconds.do(on_new_day)
+schedule.every().hour.do(on_new_day)
+schedule.every().hour.at(':50').do(ten_minute_warning)
+
+# FOR TESTING
+# schedule.every(30).seconds.do(ten_minute_warning)
 
 job_thread = threading.Thread(target=run_jobs, daemon=True)
 print("Starting scheduled jobs")
