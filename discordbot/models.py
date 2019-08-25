@@ -1,7 +1,8 @@
 import sqlite3 as sql
 
 # TODO LITERALLY ANY ERROR HANDLING SMH
-conn = sql.connect('internal.sqlite3')
+# Also thread safety.
+conn = sql.connect('internal.sqlite3', check_same_thread=False)
 c = conn.cursor()
 
 def save():
@@ -262,6 +263,9 @@ class Player:
     def delete(self):
         c.execute("DELETE FROM Player WHERE player_id = ?", str(self.player_id))
 
+
+class Player_list:
+    pass
 
 class Team:
     team_id: int

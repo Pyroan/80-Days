@@ -17,4 +17,8 @@ def get_funding_list(team_id):
 def get_funding_table(team_id):
     columns = ['Location', 'Toll', 'Paid']
     f = get_funding_list(team_id)
-    pass
+    
+    tab = []
+
+    return "".join(tab)
+    
