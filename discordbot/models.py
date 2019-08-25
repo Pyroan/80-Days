@@ -102,6 +102,7 @@ class Log:
     date: str
     game_day: int
     msg: str
+    sent: int
 
     def load(self, id):
         c.execute("SELECT * FROM Log WHERE log_id = ?", str(id))
@@ -110,6 +111,7 @@ class Log:
         self.date = row[1]
         self.game_day = row[2]
         self.msg = row[3]
+        self.sent = row[4]
 
     def custom_load(self, where: str, values: tuple):
         c.execute("SELECT * FROM Log WHERE " + where, values)
@@ -118,18 +120,34 @@ class Log:
         self.date = row[1]
         self.game_day = row[2]
         self.msg = row[3]
+        self.sent = row[4]
     
     def insert(self):
-        c.execute("INSERT INTO Log(date, game_day, msg) VALUES (?,?,?)",
-            (self.date, self.game_day, self.msg))
+        c.execute("INSERT INTO Log(date, game_day, msg, sent) VALUES (?,?,?,?)",
+            (self.date, self.game_day, self.msg, self.sent))
     
     def update(self):
-        c.execute("UPDATE Log SET date = ?, game_day = ?, msg = ? WHERE log_id = ?",
-            (self.date, self.game_day, self.msg, self.log_id))
+        c.execute("UPDATE Log SET date = ?, game_day = ?, msg = ?, sent = ? WHERE log_id = ?",
+            (self.date, self.game_day, self.msg, self.sent, self.log_id))
     
     def delete(self):
         c.execute("DELETE FROM Log WHERE log_id = ?", str(self.log_id))
 
+class Log_list:
+    items = []
+
+    def custom_load(self, where: str, values: tuple):
+        self.items = []
+        c.execute("SELECT * FROM Log WHERE " + where, values)
+        rows = c.fetchall()
+        for item in rows:
+            l = Log()
+            l.log_id = item[0]
+            l.date = item[1]
+            l.game_day = item[2]
+            l.msg = item[3]
+            l.sent = item[4]
+            self.items.append(l)
 
 class Payment:
     payment_id: int
