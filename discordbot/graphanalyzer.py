@@ -1,6 +1,6 @@
 import models
 
-# Minimum distance between two edge ID's
+# Minimum distance between two location ID's
 def get_min_distance(start, end):
     pass
 

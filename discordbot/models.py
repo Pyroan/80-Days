@@ -131,7 +131,6 @@ class Log:
         c.execute("DELETE FROM Log WHERE log_id = ?", str(self.log_id))
 
 
-# TODO Add a list version of this because we'll need to combine them at the end of each day
 class Payment:
     payment_id: int
     player_id: int
@@ -170,6 +169,24 @@ class Payment:
 
     def delete(self):
         c.execute("DELETE FROM Payment WHERE payment_id = ?", str(self.payment_id))
+
+class Payment_list:
+    items = []
+
+    def custom_load(self, where: str, values: tuple):
+        self.items = []
+        c.execute("SELECT * FROM Payment WHERE " + where, values)
+        rows = c.fetchall()
+        for item in rows:
+            p = Payment()
+            p.payment_id = item[0]
+            p.player_id = item[1]
+            p.team_id = item[2]
+            p.amount = item[3]
+            p.location_edge = item[4]
+            p.time = item[5]
+            self.items.append(p)
+
 
 
 class Player:
