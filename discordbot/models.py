@@ -213,6 +213,18 @@ class Payment_list:
             self.items.append(p)
 
 
+# It's just easier this way.
+class PaymentSummary:
+    items = {}
+
+    def load_payment_summary(self, day, team_id):
+        self.items = {}
+        c.execute("SELECT location_edge, SUM(amount) s, time FROM Payment WHERE time = ? AND team_id = ? GROUP BY location_edge",
+        (day, team_id,))
+        rows = c.fetchall()
+        for item in rows:
+            self.items[item[0]] = item[1]
+
 
 class Player:
     player_id: int
