@@ -9,7 +9,6 @@ from random import randint
 import json
 from datetime import date
 import time
-import schedule
 import threading
 
 import models
