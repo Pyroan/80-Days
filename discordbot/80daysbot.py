@@ -65,12 +65,12 @@ async def on_member_join(member):
         )
         )
 
-@client.command()
+@client.command(hidden=True)
 async def ping(ctx):
     await ctx.send("I am here.")
 
 # Make a payment toward an available location
-@client.command()
+@client.command(brief="Make a payment toward an available location")
 async def pay(ctx, target_location, amount):
     amount = int(amount) # dumb.
     member = ctx.message.author
@@ -123,7 +123,7 @@ async def pay(ctx, target_location, amount):
 
 
 # just pay() but with negative coins and another team
-@client.command()
+@client.command(brief="Pay to ruin another team's chances of progressing")
 async def sabotage(ctx, target_team, target_location, amount):
     # just pay() but with negative coins and another team
     amount = int(amount) # still dumb
@@ -191,7 +191,7 @@ async def sabotage(ctx, target_team, target_location, amount):
 
 
 # Print's players current coin count
-@client.command()
+@client.command(brief="Get your current coin count")
 async def me(ctx):
     member = ctx.message.author
     try:
@@ -206,7 +206,7 @@ async def me(ctx):
 # Prints the player's team's current funding for the day,
 # As well as current location,
 # And total distance remaining.
-@client.command()
+@client.command(brief="Get your team's progress for the day")
 async def team(ctx):
     # funding_table = paymentreducer.get_funding_table()
     # ctx.send("Your team is in {}, with {}km remaining\n\
