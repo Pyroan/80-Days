@@ -217,7 +217,7 @@ async def me(ctx):
     try:
         p = models.Player()
         p.custom_load("discord_id = ?", (member.id,))
-        await ctx.send(">>> {}, you have {} coins".format(member.mention, p.coins))
+        await ctx.send("{}, you have **{}** coins".format(member.mention, p.coins))
     except Exception:
         # Show error if user isn't actually playing
         await ctx.send("I... don't believe you're playing, {}\n\
@@ -226,6 +226,7 @@ async def me(ctx):
 # Prints the player's team's current funding for the day,
 # As well as current location,
 # And total distance remaining.
+#TODO
 @client.command(brief="Get your team's progress for the day")
 async def team(ctx):
     # funding_table = paymentreducer.get_funding_table()

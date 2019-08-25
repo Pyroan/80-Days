@@ -1,10 +1,13 @@
 {
     "starting_coins": 200,
-    "daily_team_coins": 1500,
+    "daily_team_coins": 2000,
     "game_length": 80,
     "refund_percentage": 75,
 
     "start_date": "2019-08-25 08:00",
-    "game_ongoing": 0
+    "game_ongoing": 0,
 
+    "channels" : {
+        "test": 614344478601510912
+    }
 }

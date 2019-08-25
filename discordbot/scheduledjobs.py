@@ -4,11 +4,13 @@ import threading
 from datetime import datetime
 import time
 import sys
-import models
 import json
 import sqlite3 as sql
 
+import models
 import paymentreducer
+import graphanalyzer
+import helpers
 
 with open('config.json') as f:
     config = json.loads(f.read())
@@ -17,7 +19,22 @@ def team_attempt_move(team_id):
     pass
 
 def pay_players():
-    pass
+    # load all the players
+    players = model.Player_list()
+    # pay 'em
+    for player in players:
+        pass
+
+
+def next_location_table(team_id):
+    t = graphanalyzer.get_next_location_list(team_id)
+    tab = []
+    tab.append("```\n")
+    for k,v in t.items():
+        tab.append("{}: {} coins\n".format(k, v))
+    tab.append("```")
+    return ''.join(tab)
+
 
 def on_new_day():
     print("A new day dawns...")
@@ -26,19 +43,36 @@ def on_new_day():
         team_attempt_move(i)
     # Send coins to players
     pay_players()
+
     # Send daily message to progress-announcements channel
     with sql.connect('internal.sqlite3') as conn:
+        msg = []
+        msg.append("A new day has begun! Welcome to day **{}**!\n".format(helpers.get_game_day()))
+        msg.append("Here's what's happened since yesterday:\n")
+        # TODO what happened yesterday
+        msg.append("```\n")
+        msg.append("Nothing!\n")
+        msg.append("```\n")
+
+        # TODO next locations
+        # FIXME hardcoded team names...
+        msg.append("**Argent Boars**, here are your destination options for today:\n")
+        msg.append(next_location_table(1))
+        msg.append("And for you, **Azure Wolves**:\n")
+        msg.append(next_location_table(2))
+        msg.append("Finally, **Crimson Stallions**:\n")
+        msg.append(next_location_table(3))
+        msg.append("Good luck!")
         c = conn.cursor()
         log = models.Log()
         log.date = str(datetime.now())
-        log.game_day = 0
-        log.msg = ":notes: It's a brand new day and my logging works :notes:"
-        log.target_channel_id = 614344478601510912
+        log.game_day = helpers.get_game_day()
+        log.msg = ''.join(msg)
+        log.target_channel_id = config['channels']['test']
         # I hate this but it's better than my hackosaurus workaround
         c.execute("INSERT INTO Log(date, game_day, msg, sent, target_channel_id) VALUES (?,?,?,?,?)",
             (log.date, log.game_day, log.msg, log.sent, log.target_channel_id))
 
-        # Send daily message to each team (potentially can skip)
         conn.commit()
 
 
@@ -49,12 +83,14 @@ def run_jobs():
         sys.stdout.flush()
 
 # schedule.every().hour.do(on_new_day)
-# schedule.every().minute.do(on_new_day)
+#schedule.every().minute.do(on_new_day)
+#schedule.every(30).seconds.do(on_new_day)
 
 job_thread = threading.Thread(target=run_jobs, daemon=True)
 print("Starting scheduled jobs")
 job_thread.start()
+#run_jobs()
 
-if __name__ == "__main__":
-    while True:
-        pass
+# if __name__ == "__main__":
+#     while True:
+#         pass
