@@ -32,14 +32,14 @@ async def on_ready():
 @client.event
 async def check_for_new_logs():
     while True:
-        logging.info("Checking for new logs...")
         logs = models.Log_list()
         logs.custom_load("sent = ?", (0,))
         if len(logs.items) > 0:
+            logging.info("Found {} new logs, attempting to send...".format(len(logs.items)))
             # Try to send them and die inside.
             try:
-                ch = client.get_channel(614344478601510912)
                 for log in logs.items:
+                    ch = get(client.get_all_channels(), id=log.target_channel_id)
                     await ch.send(log.msg)
                     log.sent = 1
                     log.update()
