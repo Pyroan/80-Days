@@ -58,12 +58,12 @@ def on_new_day():
         msg.append("Here's what's happened since yesterday:\n")
         msg.append("```\n")
         if helpers.get_game_day() == 1:
-            msg.append("The race began!\n")
+            msg.append("The race began! All teams are currently in London\n")
         else:
             msg.append("\n".join(progress_log))
         msg.append("```\n")
 
-        # TODO next locations
+        # TODO total distances
         # FIXME hardcoded team names...
         msg.append("**Argent Boars**, here are your destination options for today:\n")
         msg.append(next_location_table(1))

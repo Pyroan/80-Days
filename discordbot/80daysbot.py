@@ -14,6 +14,7 @@ import threading
 import models
 import graphanalyzer
 import scheduledjobs
+import paymentreducer
 import helpers
 
 
@@ -235,10 +236,21 @@ async def me(ctx):
 #TODO
 @client.command(brief="Get your team's progress for the day")
 async def team(ctx):
-    # funding_table = paymentreducer.get_funding_table()
-    # ctx.send("Your team is in {}, with {}km remaining\n\
-    #     Here is how your funding is going:\n{}".format())
-    pass
+    member = ctx.message.author
+    try:
+        p = models.Player()
+        p.custom_load("discord_id = ?", (member.id,))
+    except Exception:
+        await ctx.send("I don't think you're playing, {}\n\
+            (If you think this is a mistake, please talk to a Lord or the King)".format(member.mention))
+        return
+    t = models.Team()
+    t.load(p.team_id)
+    l = models.Location()
+    l.load(t.current_location_id)
+    funding_table = paymentreducer.get_funding_table(p.team_id, helpers.get_game_day())
+    await ctx.send("Your team is in **{}**, with **{}**km remaining\nHere is how today's funding is going:\n{}".format(
+        l.name, "many ", "```"+funding_table+"```")) #TODO replace many
 
 @client.command(brief="Start the game!", hidden=True)
 @commands.has_role("King")
@@ -277,7 +289,6 @@ async def startgame(ctx):
         json.dump(config, f)
     scheduledjobs.config = config
     helpers.config = config
-    # TODO Send start of game message...
     scheduledjobs.on_new_day() # if this works...
 
 

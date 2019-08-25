@@ -1,6 +1,6 @@
 import sqlite3 as sql
 
-# TODO LITERALLY ANY ERROR HANDLING SMH
+# FIXME LITERALLY ANY ERROR HANDLING SMH
 # Also thread safety.
 conn = sql.connect('internal.sqlite3', check_same_thread=False)
 c = conn.cursor()
@@ -218,10 +218,14 @@ class Payment_list:
 class PaymentSummary:
     items = {}
 
-    def load_payment_summary(self, day, team_id):
+    def load_payment_summary(self, day, team_id, show_sabotage):
         self.items = {}
-        c.execute("SELECT location_edge, SUM(amount) s, time FROM Payment WHERE time = ? AND team_id = ? GROUP BY location_edge",
-        (day, team_id,))
+        if show_sabotage:
+            c.execute("SELECT location_edge, SUM(amount) s, time FROM Payment WHERE time = ? AND team_id = ? GROUP BY location_edge",
+                (day, team_id,))
+        else:
+            c.execute("SELECT location_edge, SUM(amount) s, time FROM Payment WHERE time = ? AND team_id = ? AND amount > 0 GROUP BY location_edge",
+                (day, team_id,))
         rows = c.fetchall()
         for item in rows:
             self.items[item[0]] = item[1]
