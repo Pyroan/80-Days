@@ -15,9 +15,8 @@ import graphanalyzer
 
 
 logging.basicConfig(level=logging.INFO)
-client = Bot(description="80 Days Bot", command_prefix=("!"), pm_help=True)
+client = Bot(description="80 Days Bot", command_prefix=("!"))
 
-locale.setlocale()
 
 with open('config.json') as f:
     config = json.loads(f.read())
@@ -70,6 +69,7 @@ async def on_member_join(member):
 async def ping(ctx):
     await ctx.send("I am here.")
 
+# Make a payment toward an available location
 @client.command()
 async def pay(ctx, target_location, amount):
     amount = int(amount) # dumb.
@@ -82,7 +82,7 @@ async def pay(ctx, target_location, amount):
             If you believe this is an error, please talk to a Lord or the King".format(
                 member.mention))
         return
-    # TODO Make sure player has enough coins!!!
+    # Make sure player has enough coins!!!
     if amount > p.coins:
         await ctx.send("{}, you don't have enough coins!".format(member.mention))
         return
@@ -121,10 +121,74 @@ async def pay(ctx, target_location, amount):
     await ctx.send("{} has paid **{}** coins toward **{}**".format(
         member.mention, amount, target_loc.name))
 
+
+# just pay() but with negative coins and another team
 @client.command()
 async def sabotage(ctx, target_team, target_location, amount):
     # just pay() but with negative coins and another team
-    pass
+    amount = int(amount) # still dumb
+    member = ctx.message.author
+    p = models.Player()
+    try:
+        p.custom_load("discord_id = ?", (member.id,))
+    except Exception:
+        await ctx.send("Gonna be hard to sabotage when I don't have you listed as a player, {}\n\
+            If you believe this is a mistake, please talk to a Lord or the King".format(member.mention))
+        return
+    # Mke sure player has enough coins
+    if amount > p.coins:
+        await ctx.send("{}, you don't have enough coins!".format(member.mention))
+        return
+    
+    t = models.Team()
+    try:
+        t.custom_load("name = ? COLLATE NOCASE", (target_team,)) # TODO make this more user-friendly
+    except Exception:
+        await ctx.send("I don't think {} is a real team, {}. Make sure you type the full name!".format(
+            target_team, member.mention
+        ))
+        return
+    
+    if t.team_id == p.team_id:
+        await ctx.send("You can't sabotage your own team, {}!!! They won't like you for that!".format(
+            member.mention
+        ))
+        return
+    
+    current_loc = t.current_location_id
+    avail_locs = graphanalyzer.get_next_location_list(t.team_id)
+    # Validate target location...
+    if target_location.lower() not in (name.lower() for name in avail_locs.keys()):
+        await ctx.send("I don't think {} is a valid location. Maybe a typo?".format(
+            target_location
+        ))
+        return
+    # Get id for the target location...
+    location = models.Location()
+    location.custom_load("name = ? COLLATE NOCASE", (target_location,))
+
+    edge = models.LocationEdge()
+    edge.custom_load("start_location_id = ? AND end_location_id = ?",
+        (current_loc, location.location_id))
+    
+    # Store the payment!
+    payment = models.Payment()
+    payment.player_id = p.player_id
+    payment.team_id = t.team_id
+    payment.amount = -amount # VERY IMPORTANT DIFFERENCE
+    payment.location_edge = edge.edge_id
+    payment.time = str(date.today())
+    payment.insert()
+
+    # Remove coins from the player's account
+    p.coins -= amount
+    p.update()
+    models.save()
+    # Send confirmation message.
+    await ctx.send("{} has paid **{}** coins to sabotage the **{}'** trip to **{}**".format(
+        member.mention, amount, t.name, location.name
+    ))
+
 
 # Print's players current coin count
 @client.command()
