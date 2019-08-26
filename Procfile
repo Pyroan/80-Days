@@ -1,1 +1,1 @@
-worker: python ~/80daysbot.py
+worker: cd discordbot; python ./80daysbot.py
