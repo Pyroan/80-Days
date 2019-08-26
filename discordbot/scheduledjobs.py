@@ -126,7 +126,7 @@ def on_new_day():
         msg.append(next_location_table(2))
         msg.append("Finally, **Crimson Stallions**:\n")
         msg.append(next_location_table(3))
-        msg.append("Good luck!")
+        msg.append("You've all already received your salaries and refunds, so get booking and good luck!")
         c = conn.cursor()
         log = models.Log()
         log.date = str(datetime.now())
