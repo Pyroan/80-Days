@@ -17,11 +17,47 @@ with open('config.json') as f:
 
 # Actually try to move the team in the db and
 # Return a string describing the team's move
-# TODO
 def team_attempt_move(team_id):
-    return " "
+    process_log = ""
+    # Load team.
+    t = models.Team()
+    t.load(team_id)
+    flns = paymentreducer.get_funding_list(team_id, helpers.get_game_day(), False)
+    fl = paymentreducer.get_funding_list(team_id, helpers.get_game_day(), True)
 
-# TODO This
+    # Check for best-funded succesful path
+    new_loc = t.current_location_id
+    biggest_funding = -1
+    was_sabotaged = False
+    for k,v in flns.items():
+        le = models.LocationEdge()
+        le.load(k)
+        if v >= le.weight and v > biggest_funding:
+            new_loc = le.end_location_id
+            biggest_funding = v
+            if fl[k] < le.weight:
+                was_sabotaged = True
+            else:
+                was_sabotaged = False
+    
+    if biggest_funding == -1:
+        process_log = "The {} didn't raise enough to book passage anywhere...".format(t.name)
+    else:
+        l = models.Location()
+        l.load(new_loc)
+        if was_sabotaged:
+            process_log = "The {} tried to travel to {}, but someone sabotaged them and they were stopped by the Black Cats!".format(
+                t.name, l.name
+            )
+        else:
+            t.current_location_id = new_loc
+            t.update()
+            process_log = "The {} have successfully reached {}!".format(t.name, l.name)
+
+    models.save()
+    return process_log + "\n"
+
+# TODO pay players
 def pay_players():
     # load all the players
     # players = models.Player_list()
@@ -45,7 +81,7 @@ def on_new_day():
     print("A new day dawns...")
     # Each team tries to move to a new location!
     progress_log = []
-    for i in range(3):
+    for i in range(1,4):
         progress_log.append(team_attempt_move(i))
     progress_log.append("\n")
     # Send coins to players
@@ -103,7 +139,8 @@ schedule.every().hour.at(':00').do(on_new_day)
 schedule.every().hour.at(':50').do(ten_minute_warning)
 
 # FOR TESTING
-# schedule.every(30).seconds.do(ten_minute_warning)
+schedule.every(30).seconds.do(on_new_day)
+# schedule.every(3).seconds.do(ten_minute_warning)
 
 job_thread = threading.Thread(target=run_jobs, daemon=True)
 print("Starting scheduled jobs")
