@@ -61,7 +61,7 @@ async def check_for_new_logs():
 
 async def end_game():
     logging.info("Time to end the game!")
-    ch = get(client.get_all_channels(), id=config["channels"]["test"])
+    ch = get(client.get_all_channels(), id=config["channels"]["progress-announcements"])
     config['game_ongoing'] = 0
     with open('config.json', 'w') as f:
         json.dump(config, f)
