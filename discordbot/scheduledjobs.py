@@ -134,7 +134,7 @@ def on_new_day():
         log.date = str(datetime.now())
         log.game_day = helpers.get_game_day()
         log.msg = ''.join(msg)
-        log.target_channel_id = config['channels']['test']
+        log.target_channel_id = config['channels']['progress-announcements']
         # I hate this but it's better than my hackosaurus workaround
         c.execute("INSERT INTO Log(date, game_day, msg, sent, target_channel_id) VALUES (?,?,?,?,?)",
             (log.date, log.game_day, log.msg, log.sent, log.target_channel_id))
@@ -147,7 +147,7 @@ def ten_minute_warning():
     l.date = str(datetime.now())
     l.game_day = helpers.get_game_day()
     l.msg = "10 minutes remaining in the day! Get those payments in!!!"
-    l.target_channel_id = config['channels']['test']
+    l.target_channel_id = config['channels']['progress-announcements']
     l.insert()
     models.save()
 
