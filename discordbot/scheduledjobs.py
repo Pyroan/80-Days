@@ -22,8 +22,8 @@ def team_attempt_move(team_id):
     # Load team.
     t = models.Team()
     t.load(team_id)
-    flns = paymentreducer.get_funding_list(team_id, helpers.get_game_day(), False)
-    fl = paymentreducer.get_funding_list(team_id, helpers.get_game_day(), True)
+    flns = paymentreducer.get_funding_list(team_id, helpers.get_game_day()-1, False)
+    fl = paymentreducer.get_funding_list(team_id, helpers.get_game_day()-1, True)
 
     # Check for best-funded succesful path
     new_loc = t.current_location_id
@@ -57,14 +57,31 @@ def team_attempt_move(team_id):
     models.save()
     return process_log + "\n"
 
-# TODO pay players
+
 def pay_players():
-    # load all the players
-    # players = models.Player_list()
-    # # pay 'em
-    # for player in players:
-    #     pass
-    pass
+    teams = models.Team_list()
+    teams.custom_load("team_id > ?", (0,))
+    for t in teams.items:
+        # load all the players
+        players = models.Player_list()
+        players.custom_load("team_id = ?", (t.team_id,)) # Still the dumb Loadall HACK
+        
+        # pay 'em
+        for player in players.items:
+            # give 'em the flat amount.
+            player.coins += config['daily_team_coins'] // len(players.items)
+            # get  THIS PLAYER's payments from TODAY for THIS PLAYER's TEAM that
+            # WEREN'T put toward the current location
+            models.c.execute("SELECT SUM(amount) FROM Payment p LEFT JOIN LocationEdge le ON(p.location_edge = le.edge_id) WHERE player_id = ? AND team_id = ? AND time = ? AND end_location_id != ?",
+                (player.player_id, player.team_id, helpers.get_game_day()-1, t.current_location_id))
+
+            refund = models.c.fetchone()[0]
+            if refund is None:
+                refund = 0
+            player.coins += int(refund * (config['refund_percentage'] / 100))
+
+            player.update()
+    models.save()
 
 
 def next_location_table(team_id):
@@ -79,12 +96,14 @@ def next_location_table(team_id):
 
 def on_new_day():
     print("A new day dawns...")
+    print("Moving teams")
     # Each team tries to move to a new location!
     progress_log = []
     for i in range(1,4):
         progress_log.append(team_attempt_move(i))
     progress_log.append("\n")
     # Send coins to players
+    print("Paying players")
     pay_players()
 
     # Send daily message to progress-announcements channel

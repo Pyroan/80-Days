@@ -239,7 +239,6 @@ async def me(ctx):
 # Prints the player's team's current funding for the day,
 # As well as current location,
 # And total distance remaining.
-#TODO
 @client.command(brief="Get your team's progress for the day")
 async def team(ctx):
     member = ctx.message.author
@@ -257,6 +256,7 @@ async def team(ctx):
     funding_table = paymentreducer.get_funding_table(p.team_id, helpers.get_game_day())
     await ctx.send("Your team is in **{}**, with **{}**km remaining\nHere is how today's funding is going:\n{}".format(
         l.name, "many ", "```"+funding_table+"```")) #TODO replace many
+
 
 @client.command(brief="Start the game!", hidden=True)
 @commands.has_role("King")
