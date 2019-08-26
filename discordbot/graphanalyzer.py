@@ -16,8 +16,9 @@ class Graph:
     self.edges[from_node].append(to_node)
     self.distances[(from_node, to_node)] = distance
 
-
+# Supply 0 as target to return to the beginning
 def dijkstra(graph, initial, target):
+    
   visited = {initial: 0}
   path = {}
 
@@ -50,21 +51,21 @@ def dijkstra(graph, initial, target):
   return -1
 
 
-# Minimum distance between two location ID's
-def get_min_distance(start, end):
-    pass
-
 def generate_graph():
     g = Graph()
     ls = models.Location_list()
     ls.custom_load("location_id > ?", (0,))
     for l in ls.items:
         g.add_node(l.location_id)
+    g.add_node(0)
 
     les = models.LocationEdge_list()
     les.custom_load("edge_id > ?", (0,))
     for le in les.items:
-        g.add_edge(le.start_location_id, le.end_location_id, le.weight)
+        if le.end_location_id == 1:
+            g.add_edge(le.start_location_id, 0, le.weight)
+        else:
+            g.add_edge(le.start_location_id, le.end_location_id, le.weight)
 
     return g
 

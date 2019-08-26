@@ -254,8 +254,8 @@ async def team(ctx):
     l = models.Location()
     l.load(t.current_location_id)
     funding_table = paymentreducer.get_funding_table(p.team_id, helpers.get_game_day())
-    await ctx.send("Your team is in **{}**, with **{}**km remaining\nHere is how today's funding is going:\n{}".format(
-        l.name, "many ", "```"+funding_table+"```")) #TODO replace many
+    await ctx.send("Your team is in **{}**, with at least **{}km** to go!\nHere is how today's funding is going:\n{}".format(
+        l.name, graphanalyzer.dijkstra(graphanalyzer.graph, 1, 0), "```"+funding_table+"```"))
 
 
 @client.command(brief="Start the game!", hidden=True)

@@ -89,7 +89,9 @@ def next_location_table(team_id):
     tab = []
     tab.append("```\n")
     for k,v in t.items():
-        tab.append("{}: {} coins\n".format(k, v))
+        l = models.Location()
+        l.custom_load("name = ?", (k,))
+        tab.append("{}: {} coins, at least {}km from the goal\n".format(k, v, graphanalyzer.dijkstra(graphanalyzer.graph, l.location_id, 0)))
     tab.append("```")
     return ''.join(tab)
 
@@ -118,7 +120,6 @@ def on_new_day():
             msg.append("\n".join(progress_log))
         msg.append("```\n")
 
-        # TODO total distances
         # FIXME hardcoded team names...
         msg.append("**Argent Boars**, here are your destination options for today:\n")
         msg.append(next_location_table(1))
