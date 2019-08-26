@@ -1,2 +1,2 @@
-discord
-schedule
+discord.py==1.2.3
+schedule==0.6.0
