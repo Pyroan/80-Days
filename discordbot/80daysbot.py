@@ -37,6 +37,12 @@ async def check_for_new_logs():
     while True:
         if helpers.get_game_day() > config['game_length'] and config['game_ongoing']:
             await end_game()
+        t = models.Team_list()
+        t.custom_load("team_id > ?", (0,))
+        for team in t.items:
+            if team.current_location_id == 0 and config['game_ongoing']:
+                await end_game()
+
         logs = models.Log_list()
         logs.custom_load("sent = ?", (0,))
         if len(logs.items) > 0:
@@ -55,7 +61,6 @@ async def check_for_new_logs():
 
 async def end_game():
     logging.info("Time to end the game!")
-    logging.info("channel: {}".format(client.get_channel(config["channels"]["test"])))
     ch = get(client.get_all_channels(), id=config["channels"]["test"])
     config['game_ongoing'] = 0
     with open('config.json', 'w') as f:

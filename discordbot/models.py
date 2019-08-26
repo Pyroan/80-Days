@@ -13,7 +13,7 @@ class Location:
     name: str
 
     def load(self, id):
-        c.execute("SELECT * FROM Location WHERE location_id = ?", str(id))
+        c.execute("SELECT * FROM Location WHERE location_id = ?",  (str(id),))
         row = c.fetchone()
         self.location_id = row[0]
         self.name = row[1]
@@ -55,7 +55,7 @@ class LocationEdge:
     weight: int
 
     def load(self, id):
-        c.execute("SELECT * FROM LocationEdge WHERE edge_id = ?", str(id))
+        c.execute("SELECT * FROM LocationEdge WHERE edge_id = ?", (str(id),))
         row = c.fetchone()
         self.edge_id = row[0]
         self.start_location_id = row[1]
@@ -110,7 +110,7 @@ class Log:
         self.sent = 0
 
     def load(self, id):
-        c.execute("SELECT * FROM Log WHERE log_id = ?", str(id))
+        c.execute("SELECT * FROM Log WHERE log_id = ?",  (str(id),))
         row = c.fetchone()
         self.log_id = row[0]
         self.date = row[1]
@@ -166,7 +166,7 @@ class Payment:
     time: int
 
     def load(self, id):
-        c.execute("SELECT * FROM Payment WHERE payment_id = ?", str(id))
+        c.execute("SELECT * FROM Payment WHERE payment_id = ?",  (str(id),))
         row = c.fetchone()
         self.payment_id = row[0]
         self.player_id = row[1]
@@ -241,7 +241,7 @@ class Player:
         self.player_id = -1
 
     def load(self, id):
-        c.execute("SELECT * FROM Player WHERE player_id = ?", str(id))
+        c.execute("SELECT * FROM Player WHERE player_id = ?",  (str(id),))
         row = c.fetchone()
         self.player_id = row[0]
         self.discord_id = row[1]
@@ -288,7 +288,7 @@ class Team:
     current_location_id: int
     
     def load(self, id):
-        c.execute("SELECT * FROM Team WHERE team_id = ?", str(id))
+        c.execute("SELECT * FROM Team WHERE team_id = ?",  (str(id),))
         row = c.fetchone()
         self.team_id = row[0]
         self.name = row[1]

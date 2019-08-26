@@ -161,7 +161,7 @@ schedule.every().hour.at(':00').do(on_new_day)
 schedule.every().hour.at(':50').do(ten_minute_warning)
 
 # FOR TESTING
-#schedule.every(30).seconds.do(on_new_day)
+# schedule.every(30).seconds.do(on_new_day)
 # schedule.every(3).seconds.do(ten_minute_warning)
 
 job_thread = threading.Thread(target=run_jobs, daemon=True)
