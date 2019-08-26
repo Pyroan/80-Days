@@ -97,6 +97,7 @@ def next_location_table(team_id):
 
 
 def on_new_day():
+    if not config['game_ongoing']: return
     print("A new day dawns...")
     print("Moving teams")
     # Each team tries to move to a new location!
@@ -141,6 +142,7 @@ def on_new_day():
         conn.commit()
 
 def ten_minute_warning():
+    if not config['game_ongoing']: return
     l = models.Log()
     l.date = str(datetime.now())
     l.game_day = helpers.get_game_day()
@@ -159,7 +161,7 @@ schedule.every().hour.at(':00').do(on_new_day)
 schedule.every().hour.at(':50').do(ten_minute_warning)
 
 # FOR TESTING
-schedule.every(30).seconds.do(on_new_day)
+#schedule.every(30).seconds.do(on_new_day)
 # schedule.every(3).seconds.do(ten_minute_warning)
 
 job_thread = threading.Thread(target=run_jobs, daemon=True)

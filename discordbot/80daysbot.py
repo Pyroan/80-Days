@@ -31,9 +31,12 @@ async def on_ready():
     logging.info('Use this link to invite {}:'.format(client.user.name))
     logging.info('https://discordapp.com/oauth2/authorize?client_id={}&scope=bot&permissions=8'.format(client.user.id))
 
+# Also triggers end of game. Sue me. HACK
 @client.event
 async def check_for_new_logs():
     while True:
+        if helpers.get_game_day() > config['game_length'] and config['game_ongoing']:
+            await end_game()
         logs = models.Log_list()
         logs.custom_load("sent = ?", (0,))
         if len(logs.items) > 0:
@@ -50,9 +53,45 @@ async def check_for_new_logs():
                 logging.info("We can't see the channel yet. We'll get 'em next time.")
         await asyncio.sleep(5)
 
-# TODO This
 async def end_game():
-    pass
+    logging.info("Time to end the game!")
+    logging.info("channel: {}".format(client.get_channel(config["channels"]["test"])))
+    ch = get(client.get_all_channels(), id=config["channels"]["test"])
+    config['game_ongoing'] = 0
+    with open('config.json', 'w') as f:
+        json.dump(config, f)
+    scheduledjobs.config = config
+    helpers.config = config
+    # Load winners
+    winners = []
+    teams = models.Team_list()
+    teams.custom_load("team_id > ?", (0,))
+    for t in teams.items:
+        start_loc = t.current_location_id
+        if start_loc == 1:
+            start_loc = 0
+        winners.append((t.name, graphanalyzer.dijkstra(graphanalyzer.graph, start_loc, 0)))
+    winners.sort(key=lambda x: x[1], reverse=True)
+    # Make a big deal of everything, really.
+    try :
+        await ch.send("All right, adventurers! The game has ended! Drumroll please!!!")
+        await(asyncio.sleep(5))
+        await ch.send("In third place, with {}km remaining, the {}!".format(winners[0][1], winners[0][0]))
+        await(asyncio.sleep(3))
+        await ch.send("In second place, with {}km remaining, the {}!!".format(winners[1][1], winners[1][0]))
+        await(asyncio.sleep(3))
+        await ch.send("Finally, in first place, the {}!!!!!!!!! Congratulations!".format(winners[2][0]))
+        await(asyncio.sleep(3))
+        await ch.send("Thank you all for playing! I hope you had fun! Now, I'm going to take a nap. Maybe we can do this again some time :sweat_smile:")
+    except AttributeError:
+        logging.info("Can't see the channel. We'll get 'em next time.")
+        return
+    exit()
+
+@commands.has_role("King")
+@client.command(hidden=True)
+async def endgame(ctx):
+    await end_game()
 
 @client.event
 async def on_member_join(member):
@@ -99,6 +138,8 @@ async def ping(ctx):
 # Make a payment toward an available location
 @client.command(brief="Make a payment toward an available location")
 async def pay(ctx, target_location, amount):
+    if not config['game_ongoing']: return
+
     amount = int(amount) # dumb.
     member = ctx.message.author
     p = models.Player()
@@ -155,6 +196,7 @@ async def pay(ctx, target_location, amount):
 # just pay() but with negative coins and another team
 @client.command(brief="Pay to ruin another team's chances of progressing")
 async def sabotage(ctx, target_team, target_location, amount):
+    if not config['game_ongoing']: return
     # just pay() but with negative coins and another team
     amount = int(amount) # still dumb
     member = ctx.message.author
@@ -226,6 +268,7 @@ async def sabotage(ctx, target_team, target_location, amount):
 # Print's players current coin count
 @client.command(brief="Get your current coin count")
 async def me(ctx):
+    if not config['game_ongoing']: return
     member = ctx.message.author
     try:
         p = models.Player()
@@ -241,6 +284,7 @@ async def me(ctx):
 # And total distance remaining.
 @client.command(brief="Get your team's progress for the day")
 async def team(ctx):
+    if not config['game_ongoing']: return
     member = ctx.message.author
     try:
         p = models.Player()
@@ -295,7 +339,7 @@ async def startgame(ctx):
         json.dump(config, f)
     scheduledjobs.config = config
     helpers.config = config
-    scheduledjobs.on_new_day() # if this works...
+    scheduledjobs.on_new_day()
 
 
 client.loop.create_task(check_for_new_logs())
