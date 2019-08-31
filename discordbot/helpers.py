@@ -12,7 +12,7 @@ def get_game_day():
     now = datetime.now()
     now.replace(minute=0,second=0,microsecond=0)
     td = now - start_time
-    return (td.seconds // 3600) + 1
+    return int(td.total_seconds() // 3600) + 1
 
 
 def create_edge(start_loc, end_loc, weight=0):
