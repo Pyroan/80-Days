@@ -18,7 +18,7 @@ I love game jams.
 8. Create a Discord server. Create a text channel called "instructions" and a channel called "player-assignments". It also requires a channel for "Progress Announcements" and one for testing, but neither of them are required to have a specific name.
 9. Enable Discord's Developer Mode if you haven't already. (Settings -> Appearance -> Advanced -> Developer Mode)
 10. Open `discordbot/config.json`. Change the value for `progress-annnouncements` to the id for your Progress Announcements channel, and the value for `test` to the id your test channel. You can get the ids by right clicking on the channel in Discord and clicking "Copy ID".
-    * While you're here, it might be best if you set `game-ongoing` to 0 as well, if it insn't already.
+    * While you're here, it might be best if you set `game-ongoing` to 0 as well, if it isn't already.
 11. Navigate to `discordbot` and run `python 80days.py`. If everything works, you should find this somewhere in your output:
 ```
 INFO:root:Use this link to invite 80Days:
