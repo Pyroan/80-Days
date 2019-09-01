@@ -1,3 +1,4 @@
+![discord shield](https://img.shields.io/discord/614335416178442242?label=players&logo=discord)
 # 80-Days
 A Collaborate Chat Game for Extra Credits Game Jam #5
 
