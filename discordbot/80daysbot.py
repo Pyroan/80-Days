@@ -35,33 +35,29 @@ async def on_ready():
 @client.event
 async def check_for_new_logs():
     while True:
-        try: 
-            if helpers.get_game_day() > config['game_length'] and config['game_ongoing']:
+        if helpers.get_game_day() > config['game_length'] and config['game_ongoing']:
+            await end_game()
+        t = models.Team_list()
+        t.custom_load("team_id > ?", (0,))
+        for team in t.items:
+            if team.current_location_id == 0 and config['game_ongoing']:
                 await end_game()
-            t = models.Team_list()
-            t.custom_load("team_id > ?", (0,))
-            for team in t.items:
-                if team.current_location_id == 0 and config['game_ongoing']:
-                    await end_game()
 
-            logs = models.Log_list()
-            logs.custom_load("sent = ?", (0,))
-            if len(logs.items) > 0:
-                logging.info("Found {} new logs, attempting to send...".format(len(logs.items)))
-                # Try to send them and die inside.
-                try:
-                    for log in logs.items:
-                        ch = get(client.get_all_channels(), id=log.target_channel_id)
-                        await ch.send(log.msg)
-                        log.sent = 1
-                        log.update()
-                    models.save()
-                except AttributeError:
-                    logging.error("We can't see the channel yet. We'll get 'em next time.")
-            await asyncio.sleep(5)
-        except Exception as e:
-            # HACK bandaid to stop the logs from crashing _permanently_
-            logging.error("Error while checking for logs:\n\t{}".format(e))
+        logs = models.Log_list()
+        logs.custom_load("sent = ?", (0,))
+        if len(logs.items) > 0:
+            logging.info("Found {} new logs, attempting to send...".format(len(logs.items)))
+            # Try to send them and die inside.
+            try:
+                for log in logs.items:
+                    ch = get(client.get_all_channels(), id=log.target_channel_id)
+                    await ch.send(log.msg)
+                    log.sent = 1
+                    log.update()
+                models.save()
+            except AttributeError:
+                logging.error("We can't see the channel yet. We'll get 'em next time.")
+        await asyncio.sleep(5)
 
 async def end_game():
     logging.info("Time to end the game!")
