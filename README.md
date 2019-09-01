@@ -14,7 +14,7 @@ I love game jams.
 5. Set an environment variable (you'll have to look up how to do this on your own system/container) called `80DAYS_TOKEN` and use the token you acquired in the previous step as the value.
 
 6. Install [DB Browser for SQLite](https://sqlitebrowser.org/) or equivalent database browser.
-7. Import `internal.sql` into your viewer to create the database.
+7. Import `discordbot/internal.sql` into your viewer to create the database. The db should be called `discordbot/internal.sqlite3`. I'm not sure how that works.
 8. Create a Discord server.
     * Create a text channel called "instructions" and a channel called "player-assignments".
     * It also requires a text channel for "Progress Announcements" and one for testing, but neither of them are required to have a specific name.
