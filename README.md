@@ -1,4 +1,4 @@
-![discord shield](https://img.shields.io/discord/614335416178442242?label=players&logo=discord)
+![discord shield](https://img.shields.io/discord/614335416178442242?color=7289DA&label=players&logo=discord)
 
 **Join the game [Here](https://pyroan.itch.io/80-days)**
 # 80-Days
