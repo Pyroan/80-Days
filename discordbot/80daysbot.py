@@ -306,6 +306,13 @@ async def team(ctx):
     await ctx.send("Your team is in **{}**, with at least **{}km** to go!\nHere is how today's funding is going:\n{}".format(
         l.name, graphanalyzer.dijkstra(graphanalyzer.graph, t.current_location_id, 0), "```"+funding_table+"```"))
 
+@client.command(brief="Opt in to the next game")
+async def join(ctx):
+    pass
+
+@client.command(brief="Switch to spectator mode. Can't switch back until game is over")
+async def spectate(ctx):
+    pass
 
 @client.command(brief="Start the game!", hidden=True)
 @commands.has_role("King")
@@ -346,6 +353,37 @@ async def startgame(ctx):
     helpers.config = config
     scheduledjobs.on_new_day()
 
+# TODO fix rate limiting issue becuase I think it's breaking more things.
+@client.command(brief="Scramble teams", hiddden=True)
+@commands.has_role("King")
+async def scramble(ctx):
+    guild = ctx.message.guild
+    logging.info(guild)
+    players = models.Player_list()
+    players.load_all()
+    for p in players.items:
+        old_team_id = p.team_id
+        # Pick a number & update player
+        team_id = randint(1,3)
+        if old_team_id != team_id:
+            p.team_id = team_id
+            p.update()
+            old_team = models.Team()
+            old_team.load(old_team_id)
+            team = models.Team()
+            team.load(team_id)
+            # Clear/Assign role
+            old_team_role = get(guild.roles, name=old_team.name)
+            team_role = get(guild.roles, name=team.name)
+            member = guild.get_member(int(p.discord_id))
+            if member is None:
+                logging.info("Player w/ id {} not found. Maybe they left the server.".format(p.discord_id))
+                continue
+            await member.remove_roles(old_team_role, reason="Automated Team Scramble")
+            await member.add_roles(team_role, reason="Automated Team Scramble")
+            logging.info("{} was moved from {} to {}".format(
+                member.nick, old_team.name, team.name))
+    models.save()
 
 client.loop.create_task(check_for_new_logs())
 client.run(os.environ['80DAYS_TOKEN'])
