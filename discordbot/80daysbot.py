@@ -306,12 +306,12 @@ async def team(ctx):
     await ctx.send("Your team is in **{}**, with at least **{}km** to go!\nHere is how today's funding is going:\n{}".format(
         l.name, graphanalyzer.dijkstra(graphanalyzer.graph, t.current_location_id, 0), "```"+funding_table+"```"))
 
-@client.command(brief="Opt in to the next game")
+@client.command(brief="Opt in to the next game", hidden=True)
 async def join(ctx):
     pass
 
-@client.command(brief="Switch to spectator mode. Can't switch back until game is over")
-async def spectate(ctx):
+@client.command(brief="Switch to spectator mode. Can't switch back until game is over", hidden=True)
+async def spectate(ctx,):
     pass
 
 @client.command(brief="Start the game!", hidden=True)
@@ -381,9 +381,33 @@ async def scramble(ctx):
                 continue
             await member.remove_roles(old_team_role, reason="Automated Team Scramble")
             await member.add_roles(team_role, reason="Automated Team Scramble")
-            logging.info("{} was moved from {} to {}".format(
-                member.nick, old_team.name, team.name))
+            logging.info("{} (ID:{}) moved from {} to {}".format(
+                member.nick, p.discord_id, old_team.name, team.name))
+            await asyncio.sleep(1)
     models.save()
+    logging.info("Scramble complete")
+
+@client.command(brief="Make sure roles match the teams in the db", hidden=True)
+@commands.has_role("King")
+async def validateteams(ctx):
+    bad = 0
+    guild = ctx.message.guild
+    logging.info(guild)
+    players = models.Player_list()
+    players.load_all()
+    for p in players.items:
+        member = guild.get_member(int(p.discord_id))
+        t = models.Team()
+        t.load(p.team_id)
+        if member is None:
+            logging.info("Player w/ id {} not found. Maybe they left the server.".format(p.discord_id))
+        else:
+            if member.top_role.name != t.name:
+                logging.error("{} (ID:{})'s role is {}, but it should be {}".format(
+                    member.nick, p.discord_id, member.top_role.name, t.name
+                ))
+                bad += 1
+    logging.info("Validation done. {}/{} roles are correct.".format(len(players.items)-bad, len(players.items)))
 
 client.loop.create_task(check_for_new_logs())
 client.run(os.environ['80DAYS_TOKEN'])
