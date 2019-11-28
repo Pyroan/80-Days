@@ -334,7 +334,7 @@ class Player:
 
     def delete(self):
         lock.acquire()
-        c.execute("DELETE FROM Player WHERE player_id = ?", str(self.player_id))
+        c.execute("DELETE FROM Player WHERE player_id = ?", (str(self.player_id),))
         lock.release()
 
 
