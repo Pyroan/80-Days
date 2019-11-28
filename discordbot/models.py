@@ -290,6 +290,8 @@ class Player:
     discord_id: str
     team_id: int
     coins: int
+    last_active_day: int
+    shares: int
 
     def __init__(self):
         self.player_id = -1
@@ -303,6 +305,8 @@ class Player:
         self.discord_id = row[1]
         self.team_id = row[2]
         self.coins = row[3]
+        self.last_active_day = row[4]
+        self.shares = row[5]
 
     def custom_load(self, where: str, values: tuple):
         lock.acquire()
@@ -313,6 +317,8 @@ class Player:
         self.discord_id = row[1]
         self.team_id = row[2]
         self.coins = row[3]
+        self.last_active_day = row[4]
+        self.shares = row[5]
     
     def insert(self):
         lock.acquire()
@@ -346,6 +352,8 @@ class Player_list:
             p.discord_id = item[1]
             p.team_id = item[2]
             p.coins = item[3]
+            p.last_active_day = item[4]
+            p.shares = item[5]
             self.items.append(p)
     
     def load_all(self):
@@ -360,6 +368,8 @@ class Player_list:
             p.discord_id = item[1]
             p.team_id = item[2]
             p.coins = item[3]
+            p.last_active_day = item[4]
+            p.shares = item[5]
             self.items.append(p)
 
 class Team:

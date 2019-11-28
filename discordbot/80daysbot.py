@@ -191,6 +191,7 @@ async def pay(ctx, target_location, amount):
 
     # Remove coins from player's account.
     p.coins -= amount
+    p.last_active_day = helpers.get_game_day()
     p.update()
     models.save()
     # Send confirmation message.
@@ -262,6 +263,7 @@ async def sabotage(ctx, target_team, target_location, amount):
 
     # Remove coins from the player's account
     p.coins -= amount
+    p.last_active_day = helpers.get_game_day()
     p.update()
     models.save()
     # Send confirmation message.
@@ -279,6 +281,10 @@ async def me(ctx):
         p = models.Player()
         p.custom_load("discord_id = ?", (member.id,))
         await ctx.send("{}, you have **{}** coins".format(member.mention, p.coins))
+        if p.last_active_day != helpers.get_game_day():
+            p.last_active_day = helpers.get_game_day()
+            p.update()
+            models.save()
     except Exception:
         # Show error if user isn't actually playing
         await ctx.send("I... don't believe you're playing, {}\n\
@@ -294,6 +300,10 @@ async def team(ctx):
     try:
         p = models.Player()
         p.custom_load("discord_id = ?", (member.id,))
+        if p.last_active_day != helpers.get_game_day():
+            p.last_active_day = helpers.get_game_day()
+            p.update()
+            p.save()
     except Exception:
         await ctx.send("I don't think you're playing, {}\n\
             (If you think this is a mistake, please talk to a Lord or the King)".format(member.mention))

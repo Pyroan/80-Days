@@ -57,6 +57,17 @@ def team_attempt_move(team_id):
     models.save()
     return process_log + "\n"
 
+def update_shares():
+    players = models.Player_list()
+    players.load_all()
+    for player in players.items:
+        days_since_active = helpers.get_game_day() - player.last_active_day
+        if days_since_active < len(config['afk_falloff']):
+            player.shares = config['afk_falloff'][days_since_active]
+        else:
+            player.shares = 0
+        player.update()
+    models.save()
 
 def pay_players():
     teams = models.Team_list()
@@ -66,12 +77,14 @@ def pay_players():
         players = models.Player_list()
         players.custom_load("team_id = ?", (t.team_id,)) # Still the dumb Loadall HACK
         
+        total_team_shares = sum([p.shares for p in players.items])
+        share_value = config['daily_team_coins'] // total_team_shares
         # pay 'em
         for player in players.items:
-            # give 'em the flat amount.
-            player.coins += config['daily_team_coins'] // len(players.items)
+            # add daily salary
+            player.coins += share_value * player.shares
             # get  THIS PLAYER's payments from TODAY for THIS PLAYER's TEAM that
-            # WEREN'T put toward the current location
+            # WEREN'T put toward the current location (for refunds)
             models.c.execute("SELECT SUM(amount) FROM Payment p LEFT JOIN LocationEdge le ON(p.location_edge = le.edge_id) WHERE player_id = ? AND team_id = ? AND time = ? AND end_location_id != ?",
                 (player.player_id, player.team_id, helpers.get_game_day()-1, t.current_location_id))
 
@@ -106,6 +119,8 @@ def on_new_day():
         progress_log.append(team_attempt_move(i))
     progress_log.append("\n")
     # Send coins to players
+    print("Updating player shares")
+    update_shares()
     print("Paying players")
     pay_players()
 
