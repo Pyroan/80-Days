@@ -91,7 +91,6 @@ async def end_game():
     except AttributeError:
         logging.info("Can't see the channel. We'll get 'em next time.")
         return
-    exit()
 
 @commands.has_role("King")
 @client.command(hidden=True)
@@ -123,6 +122,8 @@ async def on_member_join(member):
     p.discord_id = member.id
     p.team_id = team_id
     p.coins = config['starting_coins']
+    p.last_active_day = 0
+    p.shares = 100
     p.insert()
     models.save()
 
@@ -303,7 +304,7 @@ async def team(ctx):
         if p.last_active_day != helpers.get_game_day():
             p.last_active_day = helpers.get_game_day()
             p.update()
-            p.save()
+            models.save()
     except Exception:
         await ctx.send("I don't think you're playing, {}\n\
             (If you think this is a mistake, please talk to a Lord or the King)".format(member.mention))
@@ -316,24 +317,81 @@ async def team(ctx):
     await ctx.send("Your team is in **{}**, with at least **{}km** to go!\nHere is how today's funding is going:\n{}".format(
         l.name, graphanalyzer.dijkstra(graphanalyzer.graph, t.current_location_id, 0), "```"+funding_table+"```"))
 
-@client.command(brief="Opt in to the next game", hidden=True)
+@client.command(brief="Opt in to the next game")
 async def join(ctx):
-    pass
+    member = ctx.message.author
+    if config['game_ongoing']:
+        await ctx.send("Sorry, {}, you can't join the game while it's ongoing!".format(member.mention))
+        return
+    p = models.Player()
+    # Make sure player doesn't already exist
+    try:
+        p.custom_load('discord_id = ?', (member.id,))
+        await ctx.send("I think you're already playing, {}. If you think this is an error, please talk to a Lord or the King".format(member.mention))
+        return
+    except Exception:
+        pass
+    # Pick a team
+    team_id = randint(1,3)
+    team = models.Team()
+    team.load(team_id)
 
-@client.command(brief="Switch to spectator mode. Can't switch back until game is over", hidden=True)
-async def spectate(ctx,):
-    pass
+    # Add flair to user
+    role = get(member.guild.roles, name=team.name)
+    await member.add_roles(role, reason='Player joined game')
+    # Remove spectator role
+    role = get(member.guild.roles, name='Spectator')
+    if role in member.roles:
+        await member.remove_roles(role, reason='Player joined game')
+
+    # Create new player
+    p.discord_id = member.id
+    p.team_id = team_id
+    p.coins = config['starting_coins']
+    p.last_active_day = 0
+    p.shares = 100
+    p.insert()
+    models.save()
+    logging.info("{} has joined the {}".format(member.id, team.name))
+    await ctx.send("{}, you've been added to the **{}**! Good Luck!".format(member.mention, team.name))
+
+@client.command(brief="Switch to spectator mode. Can't switch back until game is over")
+async def spectate(ctx):
+    member = ctx.message.author 
+    player = models.Player()
+    team = models.Team()
+    try: 
+        player.custom_load("discord_id = ?", (str(member.id),))
+        team.load(player.team_id)
+    except Exception as e:
+        await ctx.send("I think you're already out of the game, {}. If you think this was a mistake, please talk to a Lord or the King".format(member.mention))
+        logging.error(e)
+        return
+    # Remove flair from user
+    role = get(member.guild.roles, name = team.name)
+    await member.remove_roles(role, reason='Player left game')
+    # Add spectator role
+    role = get(member.guild.roles, name = 'Spectator')
+    await member.add_roles(role, reason='Player left game')
+    
+    player.delete()
+    models.save()
+    
+    logging.info("{} has switched to spectating".format(member.id))
+    await ctx.send("{}, you're now a spectator. Enjoy the show!".format(member.mention))
+    
 
 @client.command(brief="Start the game!", hidden=True)
 @commands.has_role("King")
 async def startgame(ctx):
     logging.info("The king has signalled to begin the game!")
     # Reset every player's coins
-    logging.info("Resetting player coins...")
+    logging.info("Resetting player coins and last_active_day...")
     ps = models.Player_list()
     ps.custom_load("player_id > ?", (0,)) # HACK to select all
     for p in ps.items:
         p.coins = config["starting_coins"]
+        p.last_active_day = 0
         p.update()
     # Reset every team's starting location
     logging.info("Resetting team locations...")
