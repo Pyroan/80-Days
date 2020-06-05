@@ -7,6 +7,7 @@ import logging
 import os
 from random import randint
 import json
+import re
 from datetime import datetime
 import time
 import threading
@@ -25,11 +26,14 @@ client = Bot(description="80 Days Bot", command_prefix=("!"))
 with open('config.json') as f:
     config = json.loads(f.read())
 
+
 @client.event
 async def on_ready():
-    logging.info('Logged in as ' + client.user.name + ' (ID:' + str(client.user.id) + ')')
+    logging.info('Logged in as ' + client.user.name +
+                 ' (ID:' + str(client.user.id) + ')')
     logging.info('Use this link to invite {}:'.format(client.user.name))
-    logging.info('https://discordapp.com/oauth2/authorize?client_id={}&scope=bot&permissions=8'.format(client.user.id))
+    logging.info(
+        'https://discordapp.com/oauth2/authorize?client_id={}&scope=bot&permissions=8'.format(client.user.id))
 
 # Also triggers end of game. Sue me. HACK
 @client.event
@@ -46,27 +50,43 @@ async def check_for_new_logs():
         logs = models.Log_list()
         logs.custom_load("sent = ?", (0,))
         if len(logs.items) > 0:
-            logging.info("Found {} new logs, attempting to send...".format(len(logs.items)))
+            logging.info(
+                "Found {} new logs, attempting to send...".format(len(logs.items)))
             # Try to send them and die inside.
             try:
                 for log in logs.items:
-                    ch = get(client.get_all_channels(), id=log.target_channel_id)
+                    ch = get(client.get_all_channels(),
+                             id=log.target_channel_id)
                     await ch.send(log.msg)
                     log.sent = 1
                     log.update()
                 models.save()
             except AttributeError:
-                logging.error("We can't see the channel yet. We'll get 'em next time.")
+                logging.error(
+                    "We can't see the channel yet. We'll get 'em next time.")
         await asyncio.sleep(5)
+
 
 async def end_game():
     logging.info("Time to end the game!")
-    ch = get(client.get_all_channels(), id=config["channels"]["progress-announcements"])
+    ch = get(client.get_all_channels(),
+             id=config["channels"]["progress-announcements"])
     config['game_ongoing'] = 0
     with open('config.json', 'w') as f:
         json.dump(config, f)
     scheduledjobs.config = config
     helpers.config = config
+    # Invalidate All Oustanding Logs
+    logs = models.Log_list()
+    logs.custom_load("sent = ?", (0,))
+    if len(logs.items) > 0:
+        try:
+            for log in logs.items:
+                log.sent = 1
+                log.update()
+        except Exception as e:
+            logging.error("Failed to invalidate old logs - {}".format(e))
+        models.save()
     # Load winners
     winners = []
     teams = models.Team_list()
@@ -75,10 +95,11 @@ async def end_game():
         start_loc = t.current_location_id
         if start_loc == 1:
             start_loc = 0
-        winners.append((t.name, graphanalyzer.dijkstra(graphanalyzer.graph, start_loc, 0)))
+        winners.append((t.name, graphanalyzer.dijkstra(
+            graphanalyzer.graph, start_loc, 0)))
     winners.sort(key=lambda x: x[1], reverse=True)
     # Make a big deal of everything, really.
-    try :
+    try:
         await ch.send("All right, adventurers! The game has ended! Drumroll please!!!")
         await(asyncio.sleep(5))
         await ch.send("In third place, with {}km remaining, the {}!".format(winners[0][1], winners[0][0]))
@@ -92,10 +113,12 @@ async def end_game():
         logging.info("Can't see the channel. We'll get 'em next time.")
         return
 
+
 @commands.has_role("King")
 @client.command(hidden=True)
 async def endgame(ctx):
     await end_game()
+
 
 @client.event
 async def on_member_join(member):
@@ -103,7 +126,7 @@ async def on_member_join(member):
     ins_chan = get(member.guild.text_channels, name="instructions")
     # Assign the new member to one of the three teams randomly
     # FIXME Get number of teams through the DB and not hardcode a 3
-    team_id = randint(1,3)
+    team_id = randint(1, 3)
     t = models.Team()
     t.load(team_id)
     # Add flair to user
@@ -122,7 +145,7 @@ async def on_member_join(member):
     p.discord_id = member.id
     p.team_id = team_id
     p.coins = config['starting_coins']
-    p.last_active_day = 0
+    p.last_active_day = helpers.get_game_day()
     p.shares = 100
     p.insert()
     models.save()
@@ -132,10 +155,11 @@ async def on_member_join(member):
         "Welcome, {}! You have been assigned to the **{}**!\n\
         Make sure to check out the {} and good luck!".format(
             member.mention,
-            t.name, 
+            t.name,
             ins_chan.mention
         )
-        )
+    )
+
 
 @client.command(hidden=True)
 async def ping(ctx):
@@ -144,9 +168,10 @@ async def ping(ctx):
 # Make a payment toward an available location
 @client.command(brief="Make a payment toward an available location")
 async def pay(ctx, target_location, amount):
-    if not config['game_ongoing']: return
+    if not config['game_ongoing']:
+        return
 
-    amount = int(amount) # dumb.
+    amount = int(amount)  # dumb.
     member = ctx.message.author
     p = models.Player()
     try:
@@ -154,7 +179,7 @@ async def pay(ctx, target_location, amount):
     except Exception:
         await ctx.send("I don't have you listed as a player, {}\n\
             If you believe this is an error, please talk to a Lord or the King".format(
-                member.mention))
+            member.mention))
         return
     # Make sure player has enough coins!!!
     if amount < 1:
@@ -177,10 +202,11 @@ async def pay(ctx, target_location, amount):
     # Get the ID for the target location...
     target_loc = models.Location()
     target_loc.custom_load("name = ? COLLATE NOCASE", (target_location,))
+    # target_loc.load((current_loc + 1) % 51)  # Hax for Paris
 
     edge = models.LocationEdge()
     edge.custom_load("start_location_id = ? AND end_location_id = ?",
-        (current_loc, target_loc.location_id,))
+                     (current_loc, target_loc.location_id,))
     # Store the payment in the db
     payment = models.Payment()
     payment.player_id = p.player_id
@@ -203,9 +229,10 @@ async def pay(ctx, target_location, amount):
 # just pay() but with negative coins and another team
 @client.command(brief="Pay to ruin another team's chances of progressing")
 async def sabotage(ctx, target_team, target_location, amount):
-    if not config['game_ongoing']: return
+    if not config['game_ongoing']:
+        return
     # just pay() but with negative coins and another team
-    amount = int(amount) # still dumb
+    amount = int(amount)  # still dumb
     member = ctx.message.author
     p = models.Player()
     try:
@@ -221,22 +248,23 @@ async def sabotage(ctx, target_team, target_location, amount):
     elif amount > p.coins:
         await ctx.send("{}, you don't have enough coins!".format(member.mention))
         return
-    
+
     t = models.Team()
     try:
-        t.custom_load("name = ? COLLATE NOCASE", (target_team,)) # TODO make this more user-friendly
+        # TODO make this more user-friendly
+        t.custom_load("name = ? COLLATE NOCASE", (target_team,))
     except Exception:
         await ctx.send("I don't think {} is a real team, {}. Make sure you type the full name!".format(
             target_team, member.mention
         ))
         return
-    
+
     if t.team_id == p.team_id:
         await ctx.send("You can't sabotage your own team, {}!!! They won't like you for that!".format(
             member.mention
         ))
         return
-    
+
     current_loc = t.current_location_id
     avail_locs = graphanalyzer.get_next_location_list(t.team_id)
     # Validate target location...
@@ -248,16 +276,17 @@ async def sabotage(ctx, target_team, target_location, amount):
     # Get id for the target location...
     location = models.Location()
     location.custom_load("name = ? COLLATE NOCASE", (target_location,))
+    # location.load((current_loc + 1) % 51)  # Hax for Paris
 
     edge = models.LocationEdge()
     edge.custom_load("start_location_id = ? AND end_location_id = ?",
-        (current_loc, location.location_id))
-    
+                     (current_loc, location.location_id))
+
     # Store the payment!
     payment = models.Payment()
     payment.player_id = p.player_id
     payment.team_id = t.team_id
-    payment.amount = -amount # VERY IMPORTANT DIFFERENCE
+    payment.amount = -amount  # VERY IMPORTANT DIFFERENCE
     payment.location_edge = edge.edge_id
     payment.time = helpers.get_game_day()
     payment.insert()
@@ -276,7 +305,8 @@ async def sabotage(ctx, target_team, target_location, amount):
 # Print's players current coin count
 @client.command(brief="Get your current coin count")
 async def me(ctx):
-    if not config['game_ongoing']: return
+    if not config['game_ongoing']:
+        return
     member = ctx.message.author
     try:
         p = models.Player()
@@ -296,7 +326,8 @@ async def me(ctx):
 # And total distance remaining.
 @client.command(brief="Get your team's progress for the day")
 async def team(ctx):
-    if not config['game_ongoing']: return
+    if not config['game_ongoing']:
+        return
     member = ctx.message.author
     try:
         p = models.Player()
@@ -313,9 +344,11 @@ async def team(ctx):
     t.load(p.team_id)
     l = models.Location()
     l.load(t.current_location_id)
-    funding_table = paymentreducer.get_funding_table(p.team_id, helpers.get_game_day())
+    funding_table = paymentreducer.get_funding_table(
+        p.team_id, helpers.get_game_day())
     await ctx.send("Your team is in **{}**, with at least **{}km** to go!\nHere is how today's funding is going:\n{}".format(
         l.name, graphanalyzer.dijkstra(graphanalyzer.graph, t.current_location_id, 0), "```"+funding_table+"```"))
+
 
 @client.command(brief="Opt in to the next game")
 async def join(ctx):
@@ -332,7 +365,7 @@ async def join(ctx):
     except Exception:
         pass
     # Pick a team
-    team_id = randint(1,3)
+    team_id = randint(1, 3)
     team = models.Team()
     team.load(team_id)
 
@@ -355,12 +388,17 @@ async def join(ctx):
     logging.info("{} has joined the {}".format(member.id, team.name))
     await ctx.send("{}, you've been added to the **{}**! Good Luck!".format(member.mention, team.name))
 
+
 @client.command(brief="Switch to spectator mode. Can't switch back until game is over")
 async def spectate(ctx):
-    member = ctx.message.author 
+    member = ctx.message.author
+    if helpers.get_game_day() > config['latest_spectate_day'] and config['game_ongoing']:
+        await ctx.send("Sorry, {}, it's too late to switch to spectator mode".format(member.mention))
+        return
+
     player = models.Player()
     team = models.Team()
-    try: 
+    try:
         player.custom_load("discord_id = ?", (str(member.id),))
         team.load(player.team_id)
     except Exception as e:
@@ -368,18 +406,41 @@ async def spectate(ctx):
         logging.error(e)
         return
     # Remove flair from user
-    role = get(member.guild.roles, name = team.name)
+    role = get(member.guild.roles, name=team.name)
     await member.remove_roles(role, reason='Player left game')
     # Add spectator role
-    role = get(member.guild.roles, name = 'Spectator')
+    role = get(member.guild.roles, name='Spectator')
     await member.add_roles(role, reason='Player left game')
-    
+
     player.delete()
     models.save()
-    
+
     logging.info("{} has switched to spectating".format(member.id))
     await ctx.send("{}, you're now a spectator. Enjoy the show!".format(member.mention))
-    
+
+
+@client.command(brief="Roll some dice. Just for fun :)")
+async def roll(ctx, dice):
+    member = ctx.message.author
+    if not re.fullmatch(r'\d*d?\d+', dice):
+        await ctx.send("I don't recognize that format, {}.\n Please phrase your roll as 'x', 'dx', or 'ydx'".format(member.mention))
+    # Parse the argument to make it play nice
+    d = dice.split('d')
+    if len(d) == 1:
+        d.insert(0, '1')
+    if d[0] == '':
+        d[0] = '1'
+    d = list(map(int, d))
+    # Validations so people don't explode the bot
+    if d[0] > 1000:
+        await ctx.send("Keeping that many dice in my head makes me dizzy, {}.\n Roll 1000 dice max, please.".format(member.mention))
+        return
+    # Roll some dice
+    total = 0
+    for _ in range(d[0]):
+        total += randint(1, d[1])
+    await ctx.send("Result of {}'s roll: **{}**".format(member.mention, total))
+
 
 @client.command(brief="Start the game!", hidden=True)
 @commands.has_role("King")
@@ -388,7 +449,7 @@ async def startgame(ctx):
     # Reset every player's coins
     logging.info("Resetting player coins and last_active_day...")
     ps = models.Player_list()
-    ps.custom_load("player_id > ?", (0,)) # HACK to select all
+    ps.custom_load("player_id > ?", (0,))  # HACK to select all
     for p in ps.items:
         p.coins = config["starting_coins"]
         p.last_active_day = 0
@@ -396,7 +457,7 @@ async def startgame(ctx):
     # Reset every team's starting location
     logging.info("Resetting team locations...")
     ts = models.Team_list()
-    ts.custom_load("team_id > ?", (0,)) # SAME HACK to select all
+    ts.custom_load("team_id > ?", (0,))  # SAME HACK to select all
     for t in ts.items:
         t.current_location_id = 1
         t.update()
@@ -413,7 +474,7 @@ async def startgame(ctx):
     # Update config
     config['game_ongoing'] = 1
     d = datetime.now()
-    d = d.replace(minute=0, second=0,microsecond=0)
+    d = d.replace(minute=0, second=0, microsecond=0)
     config['start_date'] = str(d)
     with open('config.json', 'w') as f:
         json.dump(config, f)
@@ -432,7 +493,7 @@ async def scramble(ctx):
     for p in players.items:
         old_team_id = p.team_id
         # Pick a number & update player
-        team_id = randint(1,3)
+        team_id = randint(1, 3)
         if old_team_id != team_id:
             p.team_id = team_id
             p.update()
@@ -445,7 +506,8 @@ async def scramble(ctx):
             team_role = get(guild.roles, name=team.name)
             member = guild.get_member(int(p.discord_id))
             if member is None:
-                logging.info("Player w/ id {} not found. Maybe they left the server.".format(p.discord_id))
+                logging.info(
+                    "Player w/ id {} not found. Maybe they left the server.".format(p.discord_id))
                 continue
             await member.remove_roles(old_team_role, reason="Automated Team Scramble")
             await member.add_roles(team_role, reason="Automated Team Scramble")
@@ -454,6 +516,7 @@ async def scramble(ctx):
             await asyncio.sleep(1)
     models.save()
     logging.info("Scramble complete")
+
 
 @client.command(brief="Make sure roles match the teams in the db", hidden=True)
 @commands.has_role("King")
@@ -468,14 +531,16 @@ async def validateteams(ctx):
         t = models.Team()
         t.load(p.team_id)
         if member is None:
-            logging.info("Player w/ id {} not found. Maybe they left the server.".format(p.discord_id))
+            logging.info(
+                "Player w/ id {} not found. Maybe they left the server.".format(p.discord_id))
         else:
             if member.top_role.name != t.name:
                 logging.error("{} (ID:{})'s role is {}, but it should be {}".format(
                     member.nick, p.discord_id, member.top_role.name, t.name
                 ))
                 bad += 1
-    logging.info("Validation done. {}/{} roles are correct.".format(len(players.items)-bad, len(players.items)))
+    logging.info("Validation done. {}/{} roles are correct.".format(
+        len(players.items)-bad, len(players.items)))
 
 client.loop.create_task(check_for_new_logs())
 client.run(os.environ['80DAYS_TOKEN'])
