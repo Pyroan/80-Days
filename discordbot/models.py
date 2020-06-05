@@ -322,14 +322,14 @@ class Player:
     
     def insert(self):
         lock.acquire()
-        c.execute("INSERT INTO Player(discord_id, team_id, coins) VALUES (?,?,?)",
-            (self.discord_id, self.team_id, self.coins))
+        c.execute("INSERT INTO Player(discord_id, team_id, coins, last_active_day, shares) VALUES (?,?,?,?,?)",
+            (self.discord_id, self.team_id, self.coins, self.last_active_day, self.shares))
         lock.release()
     
     def update(self):
         lock.acquire()
-        c.execute("UPDATE Player SET discord_id = ?, team_id = ?, coins = ? WHERE player_id = ?",
-            (self.discord_id, self.team_id, self.coins, self.player_id ))
+        c.execute("UPDATE Player SET discord_id = ?, team_id = ?, coins = ?, last_active_day = ?, shares = ? WHERE player_id = ?",
+            (self.discord_id, self.team_id, self.coins, self.last_active_day, self.shares, self.player_id ))
         lock.release()
 
     def delete(self):
