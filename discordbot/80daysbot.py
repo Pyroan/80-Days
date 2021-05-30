@@ -20,7 +20,9 @@ import helpers
 
 
 logging.basicConfig(level=logging.INFO)
-client = Bot(description="80 Days Bot", command_prefix=("!"))
+intents = discord.Intents.default()
+intents.members = True
+client = Bot(description="80 Days Bot", command_prefix=("!"), intents=intents)
 
 
 with open('config.json') as f:
@@ -521,7 +523,7 @@ async def scramble(ctx):
 @client.command(brief="Make sure roles match the teams in the db", hidden=True)
 @commands.has_role("King")
 async def validateteams(ctx):
-    bad = 0
+    bad, missing = 0, 0
     guild = ctx.message.guild
     logging.info(guild)
     players = models.Player_list()
@@ -533,14 +535,15 @@ async def validateteams(ctx):
         if member is None:
             logging.info(
                 "Player w/ id {} not found. Maybe they left the server.".format(p.discord_id))
+            missing += 1
         else:
             if member.top_role.name != t.name:
                 logging.error("{} (ID:{})'s role is {}, but it should be {}".format(
-                    member.nick, p.discord_id, member.top_role.name, t.name
+                    member.nick if member.nick is not None else member.name, p.discord_id, member.top_role.name, t.name
                 ))
                 bad += 1
-    logging.info("Validation done. {}/{} roles are correct.".format(
-        len(players.items)-bad, len(players.items)))
+    logging.info("Validation done. {}/{} roles are correct. ({} missing)".format(
+        len(players.items)-bad-missing, len(players.items)-missing, missing))
 
 client.loop.create_task(check_for_new_logs())
 client.run(os.environ['80DAYS_TOKEN'])
