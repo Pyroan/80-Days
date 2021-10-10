@@ -1,0 +1,90 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://github.com/pyroan/80-days/tree/master/util/80daysgame.schema.json",
+    "title": "80 Days Game",
+    "description": "One game of 80 Days, including teams, players, and payments.",
+    "type": "object",
+    "properties": {
+        "start_time": {
+            "description": "Timestamp representing the beginning of the game",
+            "type": "string",
+            "format": "date-time"
+        },
+        "length": {
+            "description": "How many in-game days the game lasted",
+            "type": "integer",
+            "minimum": 1
+        },
+        "game_mode": {
+            "type": "integer",
+            "default": 1
+        },
+        "teams": {
+            "description": "A list of teams that participated in the game",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "Team Name",
+                        "type": "string"
+                    },
+                    "place": {
+                        "description": "What position this team came in (1=1st, 2=2nd, etc)",
+                        "type": "integer"
+                    },
+                    "players": {
+                        "description": "An array of Discord IDs representing players on this team",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "uniqueItems": true
+                        }
+                    },
+                    "payments": {
+                        "type": "array",
+                        "items": {
+                            "time": {
+                                "description": "",
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            "player_id": {
+                                "type": "string"
+                            },
+                            "amount": {
+                                "type": "integer"
+                            },
+                            "location": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "sabotages": {
+                        "type": "array",
+                        "items": {
+                            "time": {
+                                "description": "",
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            "player_id": {
+                                "type": "string"
+                            },
+                            "amount": {
+                                "type": "integer"
+                            },
+                            "location": {
+                                "type": "string"
+                            },
+                            "against": {
+                                "description": "Name of the team being sabotaged",
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
