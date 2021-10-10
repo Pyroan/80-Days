@@ -116,7 +116,7 @@ async def end_game():
         return
 
 
-@commands.has_role("King")
+@commands.has_role("Monarch")
 @client.command(hidden=True)
 async def endgame(ctx):
     await end_game()
@@ -180,7 +180,7 @@ async def pay(ctx, target_location, amount):
         p.custom_load("discord_id = ?", (member.id,))
     except Exception:
         await ctx.send("I don't have you listed as a player, {}\n\
-            If you believe this is an error, please talk to a Lord or the King".format(
+            If you believe this is an error, please talk to a Lord or the Monarch".format(
             member.mention))
         return
     # Make sure player has enough coins!!!
@@ -241,7 +241,7 @@ async def sabotage(ctx, target_team, target_location, amount):
         p.custom_load("discord_id = ?", (member.id,))
     except Exception:
         await ctx.send("Gonna be hard to sabotage when I don't have you listed as a player, {}\n\
-            If you believe this is a mistake, please talk to a Lord or the King".format(member.mention))
+            If you believe this is a mistake, please talk to a Lord or the Monarch".format(member.mention))
         return
     # Mke sure player has enough coins
     if amount < 1:
@@ -321,7 +321,7 @@ async def me(ctx):
     except Exception:
         # Show error if user isn't actually playing
         await ctx.send("I... don't believe you're playing, {}\n\
-            (If you think this is a mistake, please talk to a Lord or the King)".format(member.mention))
+            (If you think this is a mistake, please talk to a Lord or the Monarch)".format(member.mention))
 
 # Prints the player's team's current funding for the day,
 # As well as current location,
@@ -340,7 +340,7 @@ async def team(ctx):
             models.save()
     except Exception:
         await ctx.send("I don't think you're playing, {}\n\
-            (If you think this is a mistake, please talk to a Lord or the King)".format(member.mention))
+            (If you think this is a mistake, please talk to a Lord or the Monarch)".format(member.mention))
         return
     t = models.Team()
     t.load(p.team_id)
@@ -362,7 +362,7 @@ async def join(ctx):
     # Make sure player doesn't already exist
     try:
         p.custom_load('discord_id = ?', (member.id,))
-        await ctx.send("I think you're already playing, {}. If you think this is an error, please talk to a Lord or the King".format(member.mention))
+        await ctx.send("I think you're already playing, {}. If you think this is an error, please talk to a Lord or the Monarch".format(member.mention))
         return
     except Exception:
         pass
@@ -404,7 +404,7 @@ async def spectate(ctx):
         player.custom_load("discord_id = ?", (str(member.id),))
         team.load(player.team_id)
     except Exception as e:
-        await ctx.send("I think you're already out of the game, {}. If you think this was a mistake, please talk to a Lord or the King".format(member.mention))
+        await ctx.send("I think you're already out of the game, {}. If you think this was a mistake, please talk to a Lord or the Monarch".format(member.mention))
         logging.error(e)
         return
     # Remove flair from user
@@ -445,9 +445,9 @@ async def roll(ctx, dice):
 
 
 @client.command(brief="Start the game!", hidden=True)
-@commands.has_role("King")
+@commands.has_role("Monarch")
 async def startgame(ctx):
-    logging.info("The king has signalled to begin the game!")
+    logging.info("The Monarch has signalled to begin the game!")
     # Reset every player's coins
     logging.info("Resetting player coins and last_active_day...")
     ps = models.Player_list()
@@ -484,9 +484,9 @@ async def startgame(ctx):
     helpers.config = config
     scheduledjobs.on_new_day()
 
-# TODO fix rate limiting issue becuase I think it's breaking more things.
+# TODO fix rate limiting issue becuase I think it's breaMonarch more things.
 @client.command(brief="Scramble teams", hiddden=True)
-@commands.has_role("King")
+@commands.has_role("Monarch")
 async def scramble(ctx):
     guild = ctx.message.guild
     logging.info(guild)
@@ -514,14 +514,14 @@ async def scramble(ctx):
             await member.remove_roles(old_team_role, reason="Automated Team Scramble")
             await member.add_roles(team_role, reason="Automated Team Scramble")
             logging.info("{} (ID:{}) moved from {} to {}".format(
-                member.nick, p.discord_id, old_team.name, team.name))
+                member.nick if member.nick is not None else member.name, p.discord_id, old_team.name, team.name))
             await asyncio.sleep(1)
     models.save()
     logging.info("Scramble complete")
 
 
 @client.command(brief="Make sure roles match the teams in the db", hidden=True)
-@commands.has_role("King")
+@commands.has_role("Monarch")
 async def validateteams(ctx):
     bad, missing = 0, 0
     guild = ctx.message.guild
