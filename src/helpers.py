@@ -1,7 +1,8 @@
 # Helper functions, mostly for creating the game
-from model import models
 import json
-from datetime import datetime, timedelta
+from datetime import datetime
+
+from model import models
 
 with open('config.json') as f:
     config = json.loads(f.read())

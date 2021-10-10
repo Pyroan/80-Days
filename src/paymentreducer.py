@@ -1,7 +1,5 @@
 # Performs calculations on payments
 from model import models
-from datetime import datetime, timedelta
-import helpers
 
 # Return a list of dicts of current funding progress
 # funding_list[location_id] = paid
