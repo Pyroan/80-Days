@@ -39,9 +39,10 @@ async def on_ready():
     logging.info(
         'https://discordapp.com/oauth2/authorize?client_id={}&scope=bot&permissions=8'.format(client.user.id))
 
-# Also triggers end of game. Sue me. HACK
+
 @client.event
 async def check_for_new_logs():
+    # Also triggers end of game. Sue me. HACK
     while True:
         if helpers.get_game_day() > config['game_length'] and config['game_ongoing']:
             await end_game()
@@ -230,12 +231,11 @@ async def pay(ctx, target_location, amount):
         member.mention, amount, target_loc.name))
 
 
-# just pay() but with negative coins and another team
 @client.command(brief="Pay to ruin another team's chances of progressing")
 async def sabotage(ctx, target_team, target_location, amount):
+    # just pay() but with negative coins and another team
     if not config['game_ongoing']:
         return
-    # just pay() but with negative coins and another team
     amount = int(amount)  # still dumb
     member = ctx.message.author
     p = models.Player()
@@ -306,9 +306,9 @@ async def sabotage(ctx, target_team, target_location, amount):
     ))
 
 
-# Print's players current coin count
 @client.command(brief="Get your current coin count")
 async def me(ctx):
+    # Print's players current coin count
     if not config['game_ongoing']:
         return
     member = ctx.message.author
@@ -325,11 +325,12 @@ async def me(ctx):
         await ctx.send("I... don't believe you're playing, {}\n\
             (If you think this is a mistake, please talk to a Lord or the Monarch)".format(member.mention))
 
-# Prints the player's team's current funding for the day,
-# As well as current location,
-# And total distance remaining.
+
 @client.command(brief="Get your team's progress for the day")
 async def team(ctx):
+    # Prints the player's team's current funding for the day,
+    # As well as current location,
+    # And total distance remaining.
     if not config['game_ongoing']:
         return
     member = ctx.message.author
@@ -486,10 +487,11 @@ async def startgame(ctx):
     helpers.config = config
     scheduledjobs.on_new_day()
 
-# TODO fix rate limiting issue becuase I think it's breaking more things.
+
 @client.command(brief="Scramble teams", hiddden=True)
 @has_role("Monarch")
 async def scramble(ctx):
+    # TODO fix rate limiting issue becuase I think it's breaking more things.
     guild = ctx.message.guild
     logging.info(guild)
     players = models.Player_list()
