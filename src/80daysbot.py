@@ -73,7 +73,7 @@ async def end_game():
              id=config["channels"]["progress-announcements"])
     config['game_ongoing'] = 0
     with open('config.json', 'w') as f:
-        json.dump(config, f)
+        json.dump(config, f, indent=4)
     scheduledjobs.config = config
     helpers.config = config
     # Invalidate All Oustanding Logs
@@ -477,7 +477,7 @@ async def startgame(ctx):
     d = d.replace(minute=0, second=0, microsecond=0)
     config['start_date'] = str(d)
     with open('config.json', 'w') as f:
-        json.dump(config, f)
+        json.dump(config, f, indent=4)
     scheduledjobs.config = config
     helpers.config = config
     scheduledjobs.on_new_day()
