@@ -12,11 +12,10 @@ from discord.ext.commands import Bot
 from discord.utils import get
 
 import scheduledjobs
-import model.models as models
 import graphanalyzer
 import helpers
 import paymentreducer
-
+from model import models
 
 logging.basicConfig(level=logging.INFO)
 intents = discord.Intents.default()

@@ -8,10 +8,10 @@ from datetime import datetime
 
 import sqlite3 as sql
 
-from model import models
 import graphanalyzer
 import helpers
 import paymentreducer
+from model import models
 
 with open('config.json') as f:
     config = json.loads(f.read())
