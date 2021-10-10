@@ -26,6 +26,11 @@ with open('config.json') as f:
     config = json.loads(f.read())
 
 
+def start_bot():
+    client.loop.create_task(check_for_new_logs())
+    client.run(os.environ['80DAYS_TOKEN'])
+
+
 @client.event
 async def on_ready():
     logging.info('Logged in as ' + client.user.name +
@@ -541,6 +546,3 @@ async def validateteams(ctx):
                 bad += 1
     logging.info("Validation done. {}/{} roles are correct. ({} missing)".format(
         len(players.items)-bad-missing, len(players.items)-missing, missing))
-
-client.loop.create_task(check_for_new_logs())
-client.run(os.environ['80DAYS_TOKEN'])
