@@ -1,16 +1,15 @@
 # OH BOY I SURE DO LOVE SCHEDULING JOBS
 import schedule
 import threading
-from datetime import datetime
 import time
 import sys
 import json
+from datetime import datetime
+
 import sqlite3 as sql
 
-import models
-import paymentreducer
-import graphanalyzer
-import helpers
+from model import models
+from util import graphanalyzer, helpers, paymentreducer
 
 with open('config.json') as f:
     config = json.loads(f.read())
