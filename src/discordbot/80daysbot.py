@@ -484,7 +484,7 @@ async def startgame(ctx):
     helpers.config = config
     scheduledjobs.on_new_day()
 
-# TODO fix rate limiting issue becuase I think it's breaMonarch more things.
+# TODO fix rate limiting issue becuase I think it's breaking more things.
 @client.command(brief="Scramble teams", hiddden=True)
 @commands.has_role("Monarch")
 async def scramble(ctx):

@@ -17,16 +17,12 @@ I love game jams.
 5. Set an environment variable (you'll have to look up how to do this on your own system/container) called `80DAYS_TOKEN` and use the token you acquired in the previous step as the value.
 
 6. Install [DB Browser for SQLite](https://sqlitebrowser.org/) or equivalent database browser.
-7. Import `discordbot/internal.sql` into your viewer to create the database. The db should be called `discordbot/internal.sqlite3`. I'm not sure how that works.
-8. Create a Discord server.
-    * Create a text channel called "instructions" and a channel called "player-assignments".
-    * It also requires a text channel for "Progress Announcements" and one for testing, but neither of them are required to have a specific name.
-    * To start the game, you'll need to assign yourself a role called "King".
-    * Finally, create the roles "Argent Boars", "Azure Wolves", and "Crimson Stallions".
+7. Import `old-data/internal.sql` into your viewer to create the database. The db should be called `discordbot/internal.sqlite3`. I'm not sure how that works.
+8. Create a Discord server using [this template](https://discord.new/7UTcVmSvh6qa).
 9. Enable Discord's Developer Mode if you haven't already. (Settings -> Appearance -> Advanced -> Developer Mode)
 10. Open `discordbot/config.json`. Change the value for `progress-annnouncements` to the id for your Progress Announcements channel, and the value for `test` to the id your test channel. You can get the ids by right clicking on the channel in Discord and clicking "Copy ID".
     * While you're here, it might be best if you set `game-ongoing` to 0 as well, if it isn't already.
-11. Navigate to `discordbot` and run `python 80days.py`. If everything works, you should find this somewhere in your output:
+11. Run `start.sh`. If everything works, you should find this somewhere in your output:
 ```
 INFO:root:Use this link to invite 80Days:
 INFO:root:https://discordapp.com/oauth2/authorize?client_id={YOUR CLIENT ID HERE}&scope=bot&permissions=8
@@ -37,5 +33,5 @@ INFO:root:https://discordapp.com/oauth2/authorize?client_id={YOUR CLIENT ID HERE
 ## Some tips for those who would like to contribute/fork
 * You'll probably need the docs for [discord.py](https://discordpy.readthedocs.io/en/latest/) and [schedule](https://schedule.readthedocs.io/en/stable/)
 * As players join they'll be randomly assigned a flair
-* Those with the King role can use hidden commands `!startgame` and `!endgame`, though end of game will normally happen automatically.
+* Those with the Monarch role can use hidden commands `!startgame` and `!endgame`, though end of game will normally happen automatically.
 * Also, if you're currently playing this game, maybe don't use the data to cheat? That'd be nice :)
