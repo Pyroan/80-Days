@@ -9,7 +9,9 @@ from datetime import datetime
 import sqlite3 as sql
 
 from model import models
-from util import graphanalyzer, helpers, paymentreducer
+import graphanalyzer
+import helpers
+import paymentreducer
 
 with open('config.json') as f:
     config = json.loads(f.read())

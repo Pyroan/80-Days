@@ -12,8 +12,10 @@ from discord.ext.commands import Bot
 from discord.utils import get
 
 import scheduledjobs
-from model import models
-from util import graphanalyzer, helpers, paymentreducer
+import model.models as models
+import graphanalyzer
+import helpers
+import paymentreducer
 
 
 logging.basicConfig(level=logging.INFO)
