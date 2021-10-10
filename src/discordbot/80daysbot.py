@@ -1,22 +1,19 @@
-import discord
 import asyncio
-from discord.ext.commands import Bot
-from discord.ext import commands
-from discord.utils import find, get
+import json
 import logging
 import os
-from random import randint
-import json
 import re
 from datetime import datetime
-import time
-import threading
+from random import randint
 
-import models
-import graphanalyzer
+import discord
+from discord.ext import commands
+from discord.ext.commands import Bot
+from discord.utils import get
+
 import scheduledjobs
-import paymentreducer
-import helpers
+from model import models
+from util import graphanalyzer, helpers, paymentreducer
 
 
 logging.basicConfig(level=logging.INFO)
