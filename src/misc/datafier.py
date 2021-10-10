@@ -1,7 +1,7 @@
 # Converts data from our databse into an open json format,
 # so people can run their own data analysis and stuff for Nerd Fun
 import json
-from .discordbot.models import *
+from model import models
 from jsonschema import validate
 
 with open("80daysgame.schema.json") as f:
