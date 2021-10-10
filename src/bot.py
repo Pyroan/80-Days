@@ -7,8 +7,7 @@ from datetime import datetime
 from random import randint
 
 import discord
-from discord.ext import commands
-from discord.ext.commands import Bot
+from discord.ext.commands import Bot, has_role
 from discord.utils import get
 
 import scheduledjobs
@@ -114,7 +113,7 @@ async def end_game():
         return
 
 
-@commands.has_role("Monarch")
+@has_role("Monarch")
 @client.command(hidden=True)
 async def endgame(ctx):
     await end_game()
@@ -443,7 +442,7 @@ async def roll(ctx, dice):
 
 
 @client.command(brief="Start the game!", hidden=True)
-@commands.has_role("Monarch")
+@has_role("Monarch")
 async def startgame(ctx):
     logging.info("The Monarch has signalled to begin the game!")
     # Reset every player's coins
@@ -484,7 +483,7 @@ async def startgame(ctx):
 
 # TODO fix rate limiting issue becuase I think it's breaking more things.
 @client.command(brief="Scramble teams", hiddden=True)
-@commands.has_role("Monarch")
+@has_role("Monarch")
 async def scramble(ctx):
     guild = ctx.message.guild
     logging.info(guild)
@@ -519,7 +518,7 @@ async def scramble(ctx):
 
 
 @client.command(brief="Make sure roles match the teams in the db", hidden=True)
-@commands.has_role("Monarch")
+@has_role("Monarch")
 async def validateteams(ctx):
     bad, missing = 0, 0
     guild = ctx.message.guild
