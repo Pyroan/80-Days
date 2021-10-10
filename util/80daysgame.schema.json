@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://github.com/pyroan/80-days/tree/master/util/80daysgame.schema.json",
+    "$id": "https://raw.githubusercontent.com/Pyroan/80-Days/master/util/80daysgame.schema.json",
     "title": "80 Days Game",
     "description": "One game of 80 Days, including teams, players, and payments.",
     "type": "object",
