@@ -1,1 +1,28 @@
-{"starting_coins": 200, "daily_team_coins": 2000, "game_length": 80, "refund_percentage": 75, "afk_falloff": [100, 100, 99, 96, 89, 73, 50, 27, 12, 5, 2, 1, 1], "start_date": "2021-10-01 09:00:00", "latest_spectate_day": 6, "game_ongoing": 0, "channels": {"test": 614344478601510912, "progress-announcements": 614336214786375682}}
+{
+    "starting_coins": 200,
+    "daily_team_coins": 2000,
+    "game_length": 80,
+    "refund_percentage": 75,
+    "afk_falloff": [
+        100,
+        100,
+        99,
+        96,
+        89,
+        73,
+        50,
+        27,
+        12,
+        5,
+        2,
+        1,
+        1
+    ],
+    "start_date": "2021-10-10 18:00:00",
+    "latest_spectate_day": 6,
+    "game_ongoing": 0,
+    "channels": {
+        "progress-announcements": 614344478601510912,
+        "test": 614336214786375682
+    }
+}
