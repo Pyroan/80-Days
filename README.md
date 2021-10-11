@@ -2,7 +2,7 @@
 
 **Join the game [Here](https://pyroan.itch.io/80-days)**
 # 80-Days
-A Collaborate Chat Game for Extra Credits Game Jam #5
+A Collaborative Chat Game for Extra Credits Game Jam #5
 
 Probably a bad idea.
 
