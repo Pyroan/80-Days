@@ -9,6 +9,7 @@ from random import randint
 
 import discord
 from discord.ext.commands import Bot, has_role, check
+from discord.ext.commands.help import DefaultHelpCommand
 from discord.utils import get
 
 import scheduledjobs
@@ -20,7 +21,8 @@ from model import models
 logging.basicConfig(level=logging.INFO)
 intents = discord.Intents.default()
 intents.members = True
-client = Bot(description="80 Days Bot", command_prefix=("!"), intents=intents)
+client = Bot(description="80 Days Bot", command_prefix=(
+    "!"), intents=intents, help_command=DefaultHelpCommand(verify_checks=False))
 
 
 with open(Path(__file__).parent / 'config.json') as f:
@@ -492,7 +494,7 @@ async def startgame(ctx):
     scheduledjobs.on_new_day()
 
 
-@client.command(brief="Scramble teams", hiddden=True)
+@client.command(brief="Scramble teams", hidden=True)
 @has_role("Monarch")
 async def scramble(ctx):
     # TODO fix rate limiting issue becuase I think it's breaking more things.
