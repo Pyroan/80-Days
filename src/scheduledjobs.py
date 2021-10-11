@@ -138,7 +138,8 @@ def on_new_day():
     pay_players()
 
     # Send daily message to progress-announcements channel
-    with sql.connect('internal.sqlite3', timeout=30) as conn:
+    with sql.connect((Path(__file__).parent / 'model' /
+                      'internal.sqlite3').resolve(), timeout=30) as conn:
         msg = []
         msg.append(
             "A new day has begun! Welcome to day **{}**!\n".format(helpers.get_game_day()))
