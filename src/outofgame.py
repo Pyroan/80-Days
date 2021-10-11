@@ -1,12 +1,11 @@
-import json
 import logging
-from pathlib import Path
 from random import randint
 
 from discord.ext.commands import Cog, command
 from discord.utils import get
 
 import helpers
+from config import config
 from model import models
 
 
@@ -15,13 +14,11 @@ class OutOfGame(Cog, name="Out Of Game"):
 
     def __init__(self, bot):
         self.bot = bot
-        with open(Path(__file__).parent / 'config.json') as f:
-            self.config = json.load(f)
 
     @command(brief="Opt in to the next game")
     async def join(self, ctx):
         member = ctx.message.author
-        if self.config['game_ongoing']:
+        if config['game_ongoing']:
             await ctx.send("Sorry, {}, you can't join the game while it's ongoing!".format(member.mention))
             return
         p = models.Player()
@@ -48,7 +45,7 @@ class OutOfGame(Cog, name="Out Of Game"):
         # Create new player
         p.discord_id = member.id
         p.team_id = team_id
-        p.coins = self.config['starting_coins']
+        p.coins = config['starting_coins']
         p.last_active_day = 0
         p.shares = 100
         p.insert()
@@ -59,7 +56,7 @@ class OutOfGame(Cog, name="Out Of Game"):
     @command(brief="Switch to spectator mode. Can't switch back until game is over")
     async def spectate(self, ctx):
         member = ctx.message.author
-        if helpers.get_game_day() > self.config['latest_spectate_day'] and self.config['game_ongoing']:
+        if helpers.get_game_day() > config['latest_spectate_day'] and config['game_ongoing']:
             await ctx.send("Sorry, {}, it's too late to switch to spectator mode".format(member.mention))
             return
 

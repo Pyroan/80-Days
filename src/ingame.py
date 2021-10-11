@@ -1,11 +1,9 @@
-import json
-from pathlib import Path
-
 from discord.ext.commands import Cog, command
 
 import graphanalyzer
 import helpers
 import paymentreducer
+from config import config
 from model import models
 
 
@@ -14,12 +12,10 @@ class InGame(Cog, name="In-Game"):
 
     def __init__(self, bot):
         self.bot = bot
-        with open(Path(__file__).parent / 'config.json') as f:
-            self.config = json.load(f)
 
     def cog_check(self, ctx):
         # Skip the decorated command if the game isn't ongoing
-        return self.config['game_ongoing']
+        return config['game_ongoing']
 
     @command(brief="Make a payment toward an available location")
     async def pay(self, ctx, target_location, amount):

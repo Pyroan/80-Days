@@ -10,6 +10,7 @@ from discord.utils import get
 
 import helpers
 import scheduledjobs
+from config import config
 from model import models
 
 
@@ -18,8 +19,6 @@ class Admin(Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        with open(Path(__file__).parent / 'config.json') as f:
-            self.config = json.load(f)
 
     def cog_check(self, ctx):
         return has_role("Monarch").predicate(ctx)
@@ -32,7 +31,7 @@ class Admin(Cog):
         ps = models.Player_list()
         ps.custom_load("player_id > ?", (0,))  # HACK to select all
         for p in ps.items:
-            p.coins = self.config["starting_coins"]
+            p.coins = config["starting_coins"]
             p.last_active_day = 0
             p.update()
         # Reset every team's starting location
@@ -53,14 +52,14 @@ class Admin(Cog):
 
         models.save()
         # Update config
-        self.config['game_ongoing'] = 1
+        config['game_ongoing'] = 1
         d = datetime.now()
         d = d.replace(minute=0, second=0, microsecond=0)
-        self.config['start_date'] = str(d)
+        config['start_date'] = str(d)
         with open(Path(__file__).parent / 'config.json', 'w') as f:
-            json.dump(self.config, f, indent=4)
-        scheduledjobs.config = self.config
-        helpers.config = self.config
+            json.dump(config, f, indent=4)
+        scheduledjobs.config = config
+        helpers.config = config
         scheduledjobs.on_new_day()
 
     @command(brief="Scramble teams", hidden=True)

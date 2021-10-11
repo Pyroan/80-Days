@@ -13,6 +13,7 @@ from discord.utils import get
 import graphanalyzer
 import helpers
 import scheduledjobs
+from config import config
 from model import models
 
 # Cogs
@@ -26,10 +27,6 @@ intents = discord.Intents.default()
 intents.members = True
 client = Bot(description="80 Days Bot", command_prefix=(
     "!"), intents=intents, help_command=DefaultHelpCommand(verify_checks=False))
-
-
-with open(Path(__file__).parent / 'config.json') as f:
-    config = json.load(f)
 
 
 def start_bot():
