@@ -1,4 +1,3 @@
-import asyncio
 import json
 from pathlib import Path
 
@@ -10,7 +9,7 @@ import paymentreducer
 from model import models
 
 
-class InGame(Cog):
+class InGame(Cog, name="In-Game"):
     # Handles commands that only work in-game
 
     def __init__(self, bot):
