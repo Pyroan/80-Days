@@ -80,7 +80,7 @@ async def check_for_new_logs():
 
 
 @client.command(hidden=True)
-@has_role("Monarch")
+@has_role(config["admin_role"])
 async def endgame(ctx):
     await end_game()
 

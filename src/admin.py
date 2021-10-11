@@ -21,7 +21,7 @@ class Admin(Cog):
         self.bot = bot
 
     def cog_check(self, ctx):
-        return has_role("Monarch").predicate(ctx)
+        return has_role(config["admin_role"]).predicate(ctx)
 
     @command(brief="Start the game!", hidden=True)
     async def startgame(self, ctx):

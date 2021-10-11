@@ -33,5 +33,5 @@ INFO:root:https://discordapp.com/oauth2/authorize?client_id={YOUR CLIENT ID HERE
 ## Some tips for those who would like to contribute/fork
 * You'll probably need the docs for [discord.py](https://discordpy.readthedocs.io/en/latest/) and [schedule](https://schedule.readthedocs.io/en/stable/)
 * As players join they'll be randomly assigned a flair
-* Those with the Monarch role can use hidden commands `!startgame` and `!endgame`, though end of game will normally happen automatically.
+* Those who have role specified in `config.admin_role` can use hidden commands `!startgame` and `!endgame`, though end of game will normally happen automatically.
 * Also, if you're currently playing this game, maybe don't use the data to cheat? That'd be nice :)
