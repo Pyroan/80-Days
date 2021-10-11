@@ -4,6 +4,7 @@ import logging
 import os
 import re
 from datetime import datetime
+from pathlib import Path
 from random import randint
 
 import discord
@@ -22,8 +23,8 @@ intents.members = True
 client = Bot(description="80 Days Bot", command_prefix=("!"), intents=intents)
 
 
-with open('config.json') as f:
-    config = json.loads(f.read())
+with open(Path(__file__).parent / 'config.json') as f:
+    config = json.load(f)
 
 
 def start_bot():
@@ -84,7 +85,7 @@ async def end_game():
     ch = get(client.get_all_channels(),
              id=config["channels"]["progress-announcements"])
     config['game_ongoing'] = 0
-    with open('config.json', 'w') as f:
+    with open(Path(__file__).parent / 'config.json', 'w') as f:
         json.dump(config, f, indent=4)
     scheduledjobs.config = config
     helpers.config = config
@@ -484,7 +485,7 @@ async def startgame(ctx):
     d = datetime.now()
     d = d.replace(minute=0, second=0, microsecond=0)
     config['start_date'] = str(d)
-    with open('config.json', 'w') as f:
+    with open(Path(__file__).parent / 'config.json', 'w') as f:
         json.dump(config, f, indent=4)
     scheduledjobs.config = config
     helpers.config = config

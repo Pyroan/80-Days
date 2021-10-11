@@ -1,9 +1,10 @@
 # OH BOY I SURE DO LOVE SCHEDULING JOBS
+import json
 import schedule
+import sys
 import threading
 import time
-import sys
-import json
+from pathlib import Path
 from datetime import datetime
 
 import sqlite3 as sql
@@ -13,8 +14,8 @@ import helpers
 import paymentreducer
 from model import models
 
-with open('config.json') as f:
-    config = json.loads(f.read())
+with open(Path(__file__).parent / 'config.json') as f:
+    config = json.load(f)
 
 # Actually try to move the team in the db and
 # Return a string describing the team's move

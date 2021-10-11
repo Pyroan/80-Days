@@ -1,11 +1,12 @@
 # Helper functions, mostly for creating the game
 import json
 from datetime import datetime
+from pathlib import Path
 
 from model import models
 
-with open('config.json') as f:
-    config = json.loads(f.read())
+with open(Path(__file__).parent / 'config.json') as f:
+    config = json.load(f)
 
 
 def get_game_day():

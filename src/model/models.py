@@ -1,9 +1,12 @@
-import sqlite3 as sql
 import threading
+from pathlib import Path
+
+import sqlite3 as sql
 
 # FIXME LITERALLY ANY ERROR HANDLING SMH
 # Also thread safety.
-conn = sql.connect('model/internal.sqlite3', check_same_thread=False)
+conn = sql.connect((Path(__file__).parent /
+                    'internal.sqlite3').resolve(), check_same_thread=False)
 c = conn.cursor()
 lock = threading.Lock()
 
