@@ -8,7 +8,6 @@ from random import randint
 from discord.ext.commands import Cog, command, has_role
 from discord.utils import get
 
-import graphanalyzer
 import helpers
 import scheduledjobs
 from model import models
