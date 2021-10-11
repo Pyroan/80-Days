@@ -2,7 +2,6 @@ import asyncio
 import json
 import logging
 import os
-import re
 from pathlib import Path
 from random import randint
 
@@ -14,10 +13,13 @@ from discord.utils import get
 import graphanalyzer
 import helpers
 import scheduledjobs
+from model import models
+
+# Cogs
 from admin import Admin
 from ingame import InGame
 from justforfun import JustForFun
-from model import models
+from outofgame import OutOfGame
 
 logging.basicConfig(level=logging.INFO)
 intents = discord.Intents.default()
@@ -32,6 +34,7 @@ with open(Path(__file__).parent / 'config.json') as f:
 
 def start_bot():
     client.add_cog(InGame(client))
+    client.add_cog(OutOfGame(client))
     client.add_cog(Admin(client))
     client.add_cog(JustForFun(client))
     client.loop.create_task(check_for_new_logs())
@@ -176,72 +179,3 @@ async def on_member_join(member):
 @client.command(hidden=True)
 async def ping(ctx):
     await ctx.send("I am here.")
-
-
-@client.command(brief="Opt in to the next game")
-async def join(ctx):
-    member = ctx.message.author
-    if config['game_ongoing']:
-        await ctx.send("Sorry, {}, you can't join the game while it's ongoing!".format(member.mention))
-        return
-    p = models.Player()
-    # Make sure player doesn't already exist
-    try:
-        p.custom_load('discord_id = ?', (member.id,))
-        await ctx.send("I think you're already playing, {}. If you think this is an error, please talk to a Lord or the Monarch".format(member.mention))
-        return
-    except Exception:
-        pass
-    # Pick a team
-    team_id = randint(1, 3)
-    team = models.Team()
-    team.load(team_id)
-
-    # Add flair to user
-    role = get(member.guild.roles, name=team.name)
-    await member.add_roles(role, reason='Player joined game')
-    # Remove spectator role
-    role = get(member.guild.roles, name='Spectator')
-    if role in member.roles:
-        await member.remove_roles(role, reason='Player joined game')
-
-    # Create new player
-    p.discord_id = member.id
-    p.team_id = team_id
-    p.coins = config['starting_coins']
-    p.last_active_day = 0
-    p.shares = 100
-    p.insert()
-    models.save()
-    logging.info("{} has joined the {}".format(member.id, team.name))
-    await ctx.send("{}, you've been added to the **{}**! Good Luck!".format(member.mention, team.name))
-
-
-@client.command(brief="Switch to spectator mode. Can't switch back until game is over")
-async def spectate(ctx):
-    member = ctx.message.author
-    if helpers.get_game_day() > config['latest_spectate_day'] and config['game_ongoing']:
-        await ctx.send("Sorry, {}, it's too late to switch to spectator mode".format(member.mention))
-        return
-
-    player = models.Player()
-    team = models.Team()
-    try:
-        player.custom_load("discord_id = ?", (str(member.id),))
-        team.load(player.team_id)
-    except Exception as e:
-        await ctx.send("I think you're already out of the game, {}. If you think this was a mistake, please talk to a Lord or the Monarch".format(member.mention))
-        logging.error(e)
-        return
-    # Remove flair from user
-    role = get(member.guild.roles, name=team.name)
-    await member.remove_roles(role, reason='Player left game')
-    # Add spectator role
-    role = get(member.guild.roles, name='Spectator')
-    await member.add_roles(role, reason='Player left game')
-
-    player.delete()
-    models.save()
-
-    logging.info("{} has switched to spectating".format(member.id))
-    await ctx.send("{}, you're now a spectator. Enjoy the show!".format(member.mention))
