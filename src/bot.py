@@ -7,7 +7,7 @@ from datetime import datetime
 from random import randint
 
 import discord
-from discord.ext.commands import Bot, has_role
+from discord.ext.commands import Bot, has_role, check
 from discord.utils import get
 
 import scheduledjobs
@@ -29,6 +29,13 @@ with open('config.json') as f:
 def start_bot():
     client.loop.create_task(check_for_new_logs())
     client.run(os.environ['80DAYS_TOKEN'])
+
+
+def ingame_only():
+    # Skip the decorated command if the game isn't ongoing
+    def predicate(ctx):
+        return config['game_ongoing']
+    return check(predicate)
 
 
 @client.event
@@ -172,9 +179,8 @@ async def ping(ctx):
 
 # Make a payment toward an available location
 @client.command(brief="Make a payment toward an available location")
+@ingame_only()
 async def pay(ctx, target_location, amount):
-    if not config['game_ongoing']:
-        return
 
     amount = int(amount)  # dumb.
     member = ctx.message.author
@@ -232,10 +238,9 @@ async def pay(ctx, target_location, amount):
 
 
 @client.command(brief="Pay to ruin another team's chances of progressing")
+@ingame_only()
 async def sabotage(ctx, target_team, target_location, amount):
     # just pay() but with negative coins and another team
-    if not config['game_ongoing']:
-        return
     amount = int(amount)  # still dumb
     member = ctx.message.author
     p = models.Player()
@@ -307,10 +312,9 @@ async def sabotage(ctx, target_team, target_location, amount):
 
 
 @client.command(brief="Get your current coin count")
+@ingame_only()
 async def me(ctx):
     # Print's players current coin count
-    if not config['game_ongoing']:
-        return
     member = ctx.message.author
     try:
         p = models.Player()
@@ -327,12 +331,11 @@ async def me(ctx):
 
 
 @client.command(brief="Get your team's progress for the day")
+@ingame_only()
 async def team(ctx):
     # Prints the player's team's current funding for the day,
     # As well as current location,
     # And total distance remaining.
-    if not config['game_ongoing']:
-        return
     member = ctx.message.author
     try:
         p = models.Player()
