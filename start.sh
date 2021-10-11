@@ -1,1 +1,1 @@
-python discordbot/80daysbot.py
+python src

@@ -1,16 +1,21 @@
-import sqlite3 as sql
 import threading
+from pathlib import Path
+
+import sqlite3 as sql
 
 # FIXME LITERALLY ANY ERROR HANDLING SMH
 # Also thread safety.
-conn = sql.connect('internal.sqlite3', check_same_thread=False)
+conn = sql.connect((Path(__file__).parent /
+                    'internal.sqlite3').resolve(), check_same_thread=False)
 c = conn.cursor()
 lock = threading.Lock()
+
 
 def save():
     lock.acquire()
     conn.commit()
     lock.release()
+
 
 class Location:
     location_id: int
@@ -31,23 +36,25 @@ class Location:
         lock.release()
         self.location_id = row[0]
         self.name = row[1]
-    
+
     def insert(self):
         lock.acquire()
         c.execute("INSERT INTO Location(name) VALUES (?)",
-            (self.name))
+                  (self.name))
         lock.release()
-    
+
     def update(self):
         lock.acquire()
         c.execute("UPDATE Location SET name = ? WHERE location_id = ?",
-            (self.name, self.location_id))
+                  (self.name, self.location_id))
         lock.release()
-    
+
     def delete(self):
         lock.acquire()
-        c.execute("DELETE FROM Location WHERE location_id = ?", str(self.location_id))
+        c.execute("DELETE FROM Location WHERE location_id = ?",
+                  str(self.location_id))
         lock.release()
+
 
 class Location_list:
     items = []
@@ -64,9 +71,10 @@ class Location_list:
             l.name = item[1]
             self.items.append(l)
 
+
 class LocationEdge:
     edge_id: int
-    start_location_id : int
+    start_location_id: int
     end_location_id: int
     weight: int
 
@@ -89,22 +97,23 @@ class LocationEdge:
         self.start_location_id = row[1]
         self.end_location_id = row[2]
         self.weight = row[3]
-    
+
     def insert(self):
         lock.acquire()
         c.execute("INSERT INTO LocationEdge(start_location_id, end_location_id, weight) VALUES (?,?,?)",
-            (self.start_location_id, self.end_location_id, self.weight))
+                  (self.start_location_id, self.end_location_id, self.weight))
         lock.release()
-    
+
     def update(self):
         lock.acquire()
-        c.execute("UPDATE LocationEdge SET start_location_id = ?, end_location_id = ?, weight = ? WHERE edge_id = ?", 
-            (self.start_location_id, self.end_location_id, self.weight, self.edge_id))
+        c.execute("UPDATE LocationEdge SET start_location_id = ?, end_location_id = ?, weight = ? WHERE edge_id = ?",
+                  (self.start_location_id, self.end_location_id, self.weight, self.edge_id))
         lock.release()
-    
+
     def delete(self):
         lock.acquire()
-        c.execute("DELETE FROM LocationEdge WHERE edge_id = ?", str(self.edge_id))
+        c.execute("DELETE FROM LocationEdge WHERE edge_id = ?",
+                  str(self.edge_id))
         lock.release()
 
 
@@ -160,23 +169,24 @@ class Log:
         self.msg = row[3]
         self.sent = row[4]
         self.target_channel_id = row[5]
-    
+
     def insert(self):
         lock.acquire()
         c.execute("INSERT INTO Log(date, game_day, msg, sent, target_channel_id) VALUES (?,?,?,?,?)",
-            (self.date, self.game_day, self.msg, self.sent, self.target_channel_id))
+                  (self.date, self.game_day, self.msg, self.sent, self.target_channel_id))
         lock.release()
-    
+
     def update(self):
         lock.acquire()
         c.execute("UPDATE Log SET date = ?, game_day = ?, msg = ?, sent = ?, target_channel_id = ? WHERE log_id = ?",
-            (self.date, self.game_day, self.msg, self.sent, self.target_channel_id, self.log_id))
+                  (self.date, self.game_day, self.msg, self.sent, self.target_channel_id, self.log_id))
         lock.release()
-    
+
     def delete(self):
         lock.acquire()
         c.execute("DELETE FROM Log WHERE log_id = ?", str(self.log_id))
         lock.release()
+
 
 class Log_list:
     items = []
@@ -196,6 +206,7 @@ class Log_list:
             l.sent = item[4]
             l.target_channel_id = item[5]
             self.items.append(l)
+
 
 class Payment:
     payment_id: int
@@ -228,23 +239,25 @@ class Payment:
         self.amount = row[3]
         self.location_edge = row[4]
         self.time = row[5]
-    
+
     def insert(self):
         lock.acquire()
         c.execute("INSERT INTO Payment(player_id, team_id, amount, location_edge, time) VALUES (?,?,?,?,?)",
-            (self.player_id, self.team_id, self.amount, self.location_edge, self.time))
+                  (self.player_id, self.team_id, self.amount, self.location_edge, self.time))
         lock.release()
-    
+
     def update(self):
         lock.acquire()
         c.execute("UPDATE Payment SET player_id = ?, team_id = ?, amount = ?, location_edge = ?, time = ? WHERE payment_id = ?",
-            (self.player_id, self.team_id, self.amount, self.location_edge, self.time, self.payment_id))
+                  (self.player_id, self.team_id, self.amount, self.location_edge, self.time, self.payment_id))
         lock.release()
 
     def delete(self):
         lock.acquire()
-        c.execute("DELETE FROM Payment WHERE payment_id = ?", str(self.payment_id))
+        c.execute("DELETE FROM Payment WHERE payment_id = ?",
+                  str(self.payment_id))
         lock.release()
+
 
 class Payment_list:
     items = []
@@ -275,10 +288,10 @@ class PaymentSummary:
         lock.acquire()
         if show_sabotage:
             c.execute("SELECT location_edge, SUM(amount) s, time FROM Payment WHERE time = ? AND team_id = ? GROUP BY location_edge",
-                (day, team_id,))
+                      (day, team_id,))
         else:
             c.execute("SELECT location_edge, SUM(amount) s, time FROM Payment WHERE time = ? AND team_id = ? AND amount > 0 GROUP BY location_edge",
-                (day, team_id,))
+                      (day, team_id,))
         rows = c.fetchall()
         lock.release()
         for item in rows:
@@ -319,27 +332,29 @@ class Player:
         self.coins = row[3]
         self.last_active_day = row[4]
         self.shares = row[5]
-    
+
     def insert(self):
         lock.acquire()
         c.execute("INSERT INTO Player(discord_id, team_id, coins, last_active_day, shares) VALUES (?,?,?,?,?)",
-            (self.discord_id, self.team_id, self.coins, self.last_active_day, self.shares))
+                  (self.discord_id, self.team_id, self.coins, self.last_active_day, self.shares))
         lock.release()
-    
+
     def update(self):
         lock.acquire()
         c.execute("UPDATE Player SET discord_id = ?, team_id = ?, coins = ?, last_active_day = ?, shares = ? WHERE player_id = ?",
-            (self.discord_id, self.team_id, self.coins, self.last_active_day, self.shares, self.player_id ))
+                  (self.discord_id, self.team_id, self.coins, self.last_active_day, self.shares, self.player_id))
         lock.release()
 
     def delete(self):
         lock.acquire()
-        c.execute("DELETE FROM Player WHERE player_id = ?", (str(self.player_id),))
+        c.execute("DELETE FROM Player WHERE player_id = ?",
+                  (str(self.player_id),))
         lock.release()
 
 
 class Player_list:
     items = []
+
     def custom_load(self, where: str, values: tuple):
         self.items = []
         lock.acquire()
@@ -355,7 +370,7 @@ class Player_list:
             p.last_active_day = item[4]
             p.shares = item[5]
             self.items.append(p)
-    
+
     def load_all(self):
         self.items = []
         lock.acquire()
@@ -372,11 +387,12 @@ class Player_list:
             p.shares = item[5]
             self.items.append(p)
 
+
 class Team:
     team_id: int
     name: str
     current_location_id: int
-    
+
     def load(self, id):
         lock.acquire()
         c.execute("SELECT * FROM Team WHERE team_id = ?",  (str(id),))
@@ -385,7 +401,7 @@ class Team:
         self.team_id = row[0]
         self.name = row[1]
         self.current_location_id = row[2]
-    
+
     def custom_load(self, where: str, values: tuple):
         lock.acquire()
         c.execute("SELECT * FROM Team WHERE " + where, values)
@@ -398,13 +414,13 @@ class Team:
     def insert(self):
         lock.acquire()
         c.execute("INSERT INTO Team(name, current_location_id) VALUES (?,?)",
-            (self.name, self.current_location_id))
+                  (self.name, self.current_location_id))
         lock.release()
 
     def update(self):
         lock.acquire()
         c.execute("UPDATE Team SET name = ?, current_location_id = ? WHERE team_id = ?",
-            (self.name, self.current_location_id, self.team_id))
+                  (self.name, self.current_location_id, self.team_id))
         lock.release()
 
     def delete(self):
@@ -412,8 +428,10 @@ class Team:
         c.execute("DELETE FROM Team WHERE team_id = ?", str(self.team_id))
         lock.release()
 
+
 class Team_list:
     items = []
+
     def custom_load(self, where: str, values: tuple):
         self.items = []
         lock.acquire()

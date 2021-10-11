@@ -1,19 +1,21 @@
 # OH BOY I SURE DO LOVE SCHEDULING JOBS
-import schedule
-import threading
-from datetime import datetime
-import time
-import sys
 import json
+import schedule
+import sys
+import threading
+import time
+from pathlib import Path
+from datetime import datetime
+
 import sqlite3 as sql
 
-import models
-import paymentreducer
 import graphanalyzer
 import helpers
+import paymentreducer
+from model import models
 
-with open('config.json') as f:
-    config = json.loads(f.read())
+with open(Path(__file__).parent / 'config.json') as f:
+    config = json.load(f)
 
 # Actually try to move the team in the db and
 # Return a string describing the team's move
@@ -136,7 +138,8 @@ def on_new_day():
     pay_players()
 
     # Send daily message to progress-announcements channel
-    with sql.connect('internal.sqlite3', timeout=30) as conn:
+    with sql.connect((Path(__file__).parent / 'model' /
+                      'internal.sqlite3').resolve(), timeout=30) as conn:
         msg = []
         msg.append(
             "A new day has begun! Welcome to day **{}**!\n".format(helpers.get_game_day()))
