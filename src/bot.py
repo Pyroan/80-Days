@@ -16,6 +16,7 @@ import helpers
 import scheduledjobs
 from admin import Admin
 from ingame import InGame
+from justforfun import JustForFun
 from model import models
 
 logging.basicConfig(level=logging.INFO)
@@ -32,6 +33,7 @@ with open(Path(__file__).parent / 'config.json') as f:
 def start_bot():
     client.add_cog(InGame(client))
     client.add_cog(Admin(client))
+    client.add_cog(JustForFun(client))
     client.loop.create_task(check_for_new_logs())
     client.run(os.environ['80DAYS_TOKEN'])
 
@@ -243,26 +245,3 @@ async def spectate(ctx):
 
     logging.info("{} has switched to spectating".format(member.id))
     await ctx.send("{}, you're now a spectator. Enjoy the show!".format(member.mention))
-
-
-@client.command(brief="Roll some dice. Just for fun :)")
-async def roll(ctx, dice):
-    member = ctx.message.author
-    if not re.fullmatch(r'\d*d?\d+', dice):
-        await ctx.send("I don't recognize that format, {}.\n Please phrase your roll as 'x', 'dx', or 'ydx'".format(member.mention))
-    # Parse the argument to make it play nice
-    d = dice.split('d')
-    if len(d) == 1:
-        d.insert(0, '1')
-    if d[0] == '':
-        d[0] = '1'
-    d = list(map(int, d))
-    # Validations so people don't explode the bot
-    if d[0] > 1000:
-        await ctx.send("Keeping that many dice in my head makes me dizzy, {}.\n Roll 1000 dice max, please.".format(member.mention))
-        return
-    # Roll some dice
-    total = 0
-    for _ in range(d[0]):
-        total += randint(1, d[1])
-    await ctx.send("Result of {}'s roll: **{}**".format(member.mention, total))
